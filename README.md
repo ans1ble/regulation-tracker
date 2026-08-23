@@ -22,7 +22,7 @@ GitHub Actions（cron 每天 01:00 UTC / 北京 09:00，或手动触发）
 
 | 名称 | 类型 | 说明 |
 |------|------|------|
-| `AGNES_API_KEY` | Secret | OpenCode 调用的模型密钥（agnes hub，对应本地 provider `0815`） |
+| `AGNES_API_KEY` | Secret（可选） | **兜底模型**密钥（agnes hub，对应 provider `0815`）。主模型用 OpenCode 免费模型 `opencode/hy3-free`（无需密钥）；仅当免费模型未产出报告且该密钥已配置时，才切换到 `0815/agnes-2.5-flash` 兜底。 |
 | `SMTP_SERVER` | Secret | 发件 SMTP 服务器，例如 `smtp.qq.com` |
 | `SMTP_PORT` | Secret | SMTP 端口，QQ 为 `465`（SSL） |
 | `SMTP_USERNAME` | Secret | 发件邮箱完整地址，例如 `xxxx@qq.com` |

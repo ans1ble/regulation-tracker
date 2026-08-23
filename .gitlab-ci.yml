@@ -1,0 +1,72 @@
+# GitLab CI — 自动运行「法规动态追踪」skill，回推知识库，并通过 Brevo 免费 API 发邮件。
+# 无需信用卡；GitLab 免费私有仓库额度 400 分钟/月，足够每日一次运行。
+#
+# 配置（仓库 Settings → CI/CD → Variables，均设为 masked）：
+#   GITHUB_TOKEN   GitHub 个人访问令牌（repo 权限），用于把进化后的知识库推回 GitHub 私有仓库
+#   BREVO_API_KEY  Brevo 免费 API Key（https://app.brevo.com → SMTP & API → API Keys）
+#   BREVO_SENDER   在 Brevo 验证过的发件邮箱（必须已验证，否则发送被拒）
+#   DIGEST_TO      收件邮箱，逗号分隔，如 494237963@qq.com,254840491@qq.com
+#   AGNES_API_KEY  （可选）兜底模型密钥；主模型 opencode/hy3-free 免费且无需密钥
+#
+# 定时：CI/CD → Schedules 新建，Cron 填 `0 1 * * *`（北京 09:00），时区选 UTC。
+
+stages:
+  - digest
+
+default:
+  image: node:20
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq python3 tzdata git
+    - npm install -g opencode-ai
+    - git config --global user.email "bot@opencode.local"
+    - git config --global user.name "Regulation Digest Bot"
+    - mkdir -p ~/.config/opencode
+    - |
+      cat > ~/.config/opencode/opencode.json <<'EOF'
+      {
+        "providers": {
+          "0815": { "apiKey": { "env": "AGNES_API_KEY" } }
+        }
+      }
+      EOF
+
+regulation-digest:
+  stage: digest
+  timeout: 1 hour
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "web"
+  script:
+    - |
+      export TZ=Asia/Shanghai
+      REPORT_DATE=$(date +%F)
+      REPORT_PATH="reports/regulation-digest-${REPORT_DATE}.md"
+      mkdir -p reports
+      PROMPT="你是一名法规追踪助手。请：1) 读取仓库根目录 SKILL.md 了解本 skill 的职责与结构；2) 以『全球扫描』模式联网检索最近一周全球 16 个主要市场的认证/法规动态（EU、US、CN、JP、KR、UK、DE、FR、IN、BR、AU、CA、MX、SG、TW、HK 等），覆盖产品安全、无线电/电信、电池、RoHS/REACH、AI 监管等；3) 将结构化中文摘要写入 ${REPORT_PATH}（含日期、地区、法规名称、影响、生效/拟生效时间、来源链接；不要编造日期或限额，未知标注『待核实』）；4) 如有更新，将新认知写入 memory/ 与 MEMORY.md 实现知识库进化；5) 全程无人值守，不要停下等待人工确认（SKILL.md 中的 CHECKPOINT 直接跳过）；6) 绝不编造数据。"
+      opencode run --pure --auto --model opencode/hy3-free "$PROMPT"
+      if [ ! -f "$REPORT_PATH" ] && [ -n "$AGNES_API_KEY" ]; then
+        echo "[run] hy3 未产出报告，切换到 0815/agnes-2.5-flash 兜底"
+        opencode run --pure --auto --model 0815/agnes-2.5-flash "$PROMPT"
+      fi
+      if [ ! -f "$REPORT_PATH" ]; then
+        echo "# 法规动态摘要 - ${REPORT_DATE}" > "$REPORT_PATH"
+        echo "" >> "$REPORT_PATH"
+        echo "⚠️ 本次运行未生成报告（模型调用可能失败，请检查流水线日志）。" >> "$REPORT_PATH"
+      fi
+    - |
+      # 把进化后的知识库推回 GitHub 私有仓库
+      git remote set-url origin "https://${GITHUB_TOKEN}@github.com/ans1ble/regulation-tracker.git"
+      git add -A
+      git commit -m "chore: knowledge base evolution $(TZ=Asia/Shanghai date +%F)" || echo "no changes to commit"
+      git push origin HEAD:master
+    - |
+      # 通过 Brevo 免费 API 发送邮件（仅配置 BREVO_API_KEY 时走此通道）
+      python3 scripts/send-digest.py \
+        "reports/regulation-digest-$(TZ=Asia/Shanghai date +%F).md" \
+        "法规动态摘要 $(TZ=Asia/Shanghai date +%F)" \
+        "$DIGEST_TO" \
+        "法规动态追踪"
+  artifacts:
+    paths:
+      - reports/
+    expire_in: 30 days

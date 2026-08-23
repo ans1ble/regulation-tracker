@@ -1,0 +1,93 @@
+name: regulation-digest-daily
+
+on:
+  schedule:
+    - cron: "0 1 * * *"   # 每天 01:00 UTC（北京时间 09:00）
+  workflow_dispatch: {}    # 允许在 Actions 页面手动触发
+
+permissions:
+  contents: read
+
+jobs:
+  run-skill-and-send:
+    runs-on: ubuntu-latest
+    env:
+      REPORT_DIR: reports
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set report date
+        run: echo "REPORT_DATE=$(date +%F)" >> "$GITHUB_ENV"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install OpenCode CLI
+        run: npm install -g opencode-ai
+
+      - name: Write OpenCode provider config
+        # CI 不读取仓库外的本地配置；此处按你本地 provider 写入最小配置（apiKey 用环境变量引用，不落盘密钥）
+        run: |
+          mkdir -p ~/.config/opencode
+          cat > ~/.config/opencode/opencode.json <<'EOF'
+          {
+            "$schema": "https://opencode.ai/config.json",
+            "provider": {
+              "0815": {
+                "models": {
+                  "agnes-2.5-flash": { "name": "" }
+                },
+                "npm": "@ai-sdk/openai-compatible",
+                "options": {
+                  "apiKey": "{env:AGNES_API_KEY}",
+                  "baseURL": "https://apihub.agnes-ai.com/v1",
+                  "setCacheKey": true
+                }
+              }
+            }
+          }
+          EOF
+
+      - name: Run regulation-tracker skill (OpenCode)
+        env:
+          AGNES_API_KEY: ${{ secrets.AGNES_API_KEY }}
+        run: |
+          mkdir -p "$REPORT_DIR"
+          opencode run --pure --auto --model 0815/agnes-2.5-flash \
+            "读取仓库根目录的 SKILL.md，按其中『追踪流程』执行全球扫描模式（未限定产品范围，覆盖 16 个市场批量抓取最新法规动态）。完成搜索/筛选/定级/5步法影响分析后，按『报告模板』输出报告并保存到 $REPORT_DIR/regulation-digest-${{ env.REPORT_DATE }}.md。注意：这是无人值守的 CI 环境，不要等待人工 CHECKPOINT 确认，直接生成并保存报告文件。网络不可达时按『失败模式与兜底』标注待核实，绝不编造日期/限值。"
+        timeout-minutes: 60
+
+      - name: Ensure report exists (fallback on failure)
+        if: always()
+        run: |
+          R="$REPORT_DIR/regulation-digest-${{ env.REPORT_DATE }}.md"
+          if [ ! -f "$R" ]; then
+            echo "# 法规动态摘要生成失败 ${{ env.REPORT_DATE }}" > "$R"
+            echo "" >> "$R"
+            echo "OpenCode 本次未生成报告文件，请检查 Actions 运行日志。" >> "$R"
+          fi
+
+      - name: Upload report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regulation-digest-${{ github.run_id }}
+          path: ${{ env.REPORT_DIR }}/regulation-digest-*.md
+
+      - name: Send email via SMTP
+        if: always()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: 法规动态摘要 ${{ env.REPORT_DATE }}
+          from: ${{ secrets.SMTP_USERNAME }}
+          to: ${{ vars.DIGEST_TO }}
+          secure: true
+          convert_markdown: true
+          body: file://${{ env.REPORT_DIR }}/regulation-digest-${{ env.REPORT_DATE }}.md

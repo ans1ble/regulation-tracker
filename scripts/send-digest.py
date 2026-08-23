@@ -1,164 +1,151 @@
 #!/usr/bin/env python3
-"""Send the regulation-tracker digest to one or more inboxes via Resend.
+"""Send the daily regulation digest report via email.
 
-Two modes:
-  1. Send an agent-generated report file:
-       python send-digest.py --to a@example.com --report report.md
-  2. Build a digest from the verified knowledge base (no report file needed):
-       python send-digest.py --to a@example.com
+Delivery order (first configured wins):
+  1. QQ SMTP  (smtp.qq.com:465, SSL)  - best deliverability to QQ inboxes
+  2. Brevo API (HTTPS/443)            - works even if SMTP port is blocked
+  3. Resend API (HTTPS/443)           - optional tertiary
 
-Options:
-  --to EMAIL       Recipient (repeatable). Falls back to DIGEST_TO env (comma-separated).
-  --subject TEXT   Email subject (default: "法规动态摘要 <date>").
-  --report PATH    Send this Markdown file instead of building from the KB.
-  --kb PATH        Path to knowledge base (default: memory/regulation-knowledge-base.md).
-  --from EMAIL     Sender address (default: digest@resend.dev — Resend test domain).
-  --dry-run        Print the digest/subject instead of sending.
+Required env (at least one method must be configured):
+  SMTP_USERNAME, SMTP_PASSWORD        -> QQ SMTP
+  BREVO_API_KEY                        -> Brevo (sender must be verified in Brevo)
+  RESEND_API_KEY                       -> Resend (sender must be verified in Resend)
 
-Requires env var RESEND_API_KEY. Uses only the Python standard library.
+Usage:
+  send-digest.py <report.md> <subject> <to_csv> [sender_name]
 """
-
-import argparse
-import json
 import os
-import re
 import sys
+import smtplib
+import ssl
+import json
+import base64
 import urllib.request
-from datetime import date
-
-# 强制 UTF-8 输出（Windows GBK 控制台无法打印 emoji/中文符号）
-try:
-    sys.stdout.reconfigure(encoding="utf-8")
-    sys.stderr.reconfigure(encoding="utf-8")
-except AttributeError:
-    pass
-
-RESEND_URL = "https://api.resend.com/emails"
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
 
 
-def build_digest_from_kb(kb_path: str) -> str:
-    """Parse the KB markdown table into a digest grouped by market."""
-    if not os.path.exists(kb_path):
-        raise SystemExit(f"知识库不存在: {kb_path}")
-
-    rows = []
-    with open(kb_path, encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if not line.startswith("|"):
-                continue
-            cells = [c.strip() for c in line.strip("|").split("|")]
-            # 跳过表头与分隔行（|---|）
-            if len(cells) < 7 or cells[0] == "法规":
-                continue
-            if all(re.fullmatch(r"-{2,}", c or "-") for c in cells):
-                continue
-            rows.append(cells)
-
-    if not rows:
-        raise SystemExit("知识库无有效记录（表头或数据缺失）")
-
-    # Group by market column (index 1)
-    by_market: dict[str, list[list[str]]] = {}
-    for r in rows:
-        by_market.setdefault(r[1], []).append(r)
-
-    digest = [
-        "# 法规动态摘要（基于已核实知识库）",
-        f"**生成日期**: {date.today().isoformat()}",
-        "> ⚠️ 静态摘要（基于已核实知识库，未做增量网络搜索）；最新动态请运行 regulation-tracker skill 获取。",
-        "",
-    ]
-    for market in sorted(by_market):
-        digest.append(f"## {market}")
-        for r in by_market[market]:
-            # 法规 | 市场 | 状态 | 生效日期 | 要求 | 来源 | 更新日期
-            digest.append(f"- **{r[0]}**（{r[2]}，{r[3]}）")
-            digest.append(f"  - 要求: {r[4]}")
-            digest.append(f"  - 来源: {r[5]}｜更新: {r[6]}")
-        digest.append("")
-    return "\n".join(digest)
+def build_message(subject, recipients, body_text, attachment_path, sender_name):
+    msg = MIMEMultipart()
+    msg["Subject"] = subject
+    msg["From"] = sender_name
+    msg["To"] = ", ".join(recipients)
+    msg.attach(MIMEText(body_text, "plain", "utf-8"))
+    if attachment_path and os.path.isfile(attachment_path):
+        with open(attachment_path, "rb") as f:
+            part = MIMEBase("application", "octet-stream")
+            part.set_payload(f.read())
+        encoders.encode_base64(part)
+        fname = os.path.basename(attachment_path)
+        part.add_header("Content-Disposition", "attachment", filename=("utf-8", "", fname))
+        msg.attach(part)
+    return msg
 
 
-def read_report(path: str) -> str:
-    if not os.path.exists(path):
-        raise SystemExit(f"报告文件不存在: {path}")
-    with open(path, encoding="utf-8") as f:
-        return f.read()
+def send_qq_smtp(subject, recipients, body_text, attachment_path, sender_name):
+    user = os.environ.get("SMTP_USERNAME")
+    pwd = os.environ.get("SMTP_PASSWORD")
+    if not (user and pwd):
+        return False
+    try:
+        msg = build_message(subject, recipients, body_text, attachment_path, user)
+        ctx = ssl.create_default_context()
+        with smtplib.SMTP_SSL("smtp.qq.com", 465, context=ctx, timeout=30) as s:
+            s.login(user, pwd)
+            s.sendmail(user, recipients, msg.as_string())
+        print("[email] sent via QQ SMTP")
+        return True
+    except Exception as e:  # noqa: BLE001
+        print(f"[email] QQ SMTP failed: {e}")
+        return False
 
 
-def send(subject: str, body_md: str, to: list[str], sender: str) -> None:
-    api_key = os.environ.get("RESEND_API_KEY")
-    if not api_key:
-        raise SystemExit("缺少环境变量 RESEND_API_KEY（Resend API key）")
-
-    # Convert markdown to minimal HTML (escape + preserve line breaks / headings)
-    html_parts = []
-    for line in body_md.splitlines():
-        if line.startswith("## "):
-            html_parts.append(f"<h2>{line[3:]}</h2>")
-        elif line.startswith("# "):
-            html_parts.append(f"<h1>{line[2:]}</h1>")
-        elif line.strip().startswith("- "):
-            html_parts.append(f"<li>{line.strip()[2:]}</li>")
-        elif line.strip().startswith("  - "):
-            html_parts.append(f"<li style='list-style:circle'>{line.strip()[4:]}</li>")
-        elif line.strip():
-            html_parts.append(f"<p>{line}</p>")
-    html = "<html><body>" + "<br>".join(html_parts) + "</body></html>"
-
+def send_brevo(subject, recipients, body_text, attachment_path, sender_name):
+    key = os.environ.get("BREVO_API_KEY")
+    if not key:
+        return False
+    sender_email = os.environ.get("BREVO_SENDER", os.environ.get("SMTP_USERNAME", "noreply@example.com"))
     payload = {
-        "from": sender,
-        "to": to,
+        "sender": {"name": sender_name, "email": sender_email},
+        "to": [{"email": r} for r in recipients],
         "subject": subject,
-        "html": html,
-        "text": body_md,
+        "textContent": body_text,
     }
+    if attachment_path and os.path.isfile(attachment_path):
+        with open(attachment_path, "rb") as f:
+            b64 = base64.b64encode(f.read()).decode()
+        payload["attachment"] = [{"content": b64, "name": os.path.basename(attachment_path)}]
     req = urllib.request.Request(
-        RESEND_URL,
+        "https://api.brevo.com/v3/smtp/email",
         data=json.dumps(payload).encode("utf-8"),
-        headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-        },
+        headers={"api-key": key, "Content-Type": "application/json", "Accept": "application/json"},
         method="POST",
     )
     try:
         with urllib.request.urlopen(req, timeout=30) as resp:
-            print(resp.read().decode("utf-8"))
-    except urllib.error.HTTPError as e:
-        detail = e.read().decode("utf-8", errors="replace")
-        raise SystemExit(f"Resend 发送失败 HTTP {e.code}: {detail}")
+            print(f"[email] sent via Brevo (HTTP {resp.status})")
+        return True
+    except Exception as e:  # noqa: BLE001
+        print(f"[email] Brevo failed: {e}")
+        return False
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description="发送法规动态摘要邮件（Resend）")
-    parser.add_argument("--to", action="append", default=[], help="收件邮箱（可多次指定）")
-    parser.add_argument("--subject", default=f"法规动态摘要 {date.today().isoformat()}")
-    parser.add_argument("--report", help="发送指定报告文件而非从知识库生成")
-    parser.add_argument("--kb", default=os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), "..", "memory", "regulation-knowledge-base.md"))
-    parser.add_argument("--from", dest="sender", default="digest@resend.dev",
-                        help="发件地址（默认 Resend 测试域 digest@resend.dev）")
-    parser.add_argument("--dry-run", action="store_true", help="只打印摘要与收件人，不发送")
-    args = parser.parse_args()
+def send_resend(subject, recipients, body_text, attachment_path, sender_name):
+    key = os.environ.get("RESEND_API_KEY")
+    if not key:
+        return False
+    sender_email = os.environ.get("RESEND_SENDER", os.environ.get("SMTP_USERNAME", "noreply@example.com"))
+    payload = {
+        "from": f"{sender_name} <{sender_email}>",
+        "to": recipients,
+        "subject": subject,
+        "text": body_text,
+    }
+    if attachment_path and os.path.isfile(attachment_path):
+        with open(attachment_path, "rb") as f:
+            b64 = base64.b64encode(f.read()).decode()
+        payload["attachments"] = [{"content": b64, "filename": os.path.basename(attachment_path)}]
+    req = urllib.request.Request(
+        "https://api.resend.com/emails",
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            print(f"[email] sent via Resend (HTTP {resp.status})")
+        return True
+    except Exception as e:  # noqa: BLE001
+        print(f"[email] Resend failed: {e}")
+        return False
 
-    to = list(args.to)
-    env_to = os.environ.get("DIGEST_TO", "")
-    if env_to:
-        to.extend(e.strip() for e in env_to.split(",") if e.strip())
-    to = list(dict.fromkeys(to))  # dedupe, keep order
-    if not to:
-        raise SystemExit("未指定收件人：用 --to 参数或 DIGEST_TO 环境变量")
 
-    body = read_report(args.report) if args.report else build_digest_from_kb(args.kb)
+def main():
+    if len(sys.argv) < 4:
+        print("Usage: send-digest.py <report.md> <subject> <to_csv> [sender_name]")
+        sys.exit(2)
+    report_path = sys.argv[1]
+    subject = sys.argv[2]
+    recipients = [r.strip() for r in sys.argv[3].split(",") if r.strip()]
+    sender_name = sys.argv[4] if len(sys.argv) > 4 else "法规动态追踪"
 
-    if args.dry_run:
-        print(f"===== DRY RUN =====\n收件人: {to}\n主题: {args.subject}\n发件: {args.sender}\n---- 正文 ----\n{body}")
-        return
+    if not recipients:
+        print("[email] no recipients provided")
+        sys.exit(1)
+    if not os.path.isfile(report_path):
+        print(f"[email] report not found: {report_path}")
+        sys.exit(1)
 
-    send(args.subject, body, to, args.sender)
-    print(f"已发送到: {', '.join(to)}")
+    with open(report_path, encoding="utf-8") as f:
+        body = f.read()
+
+    for fn in (send_qq_smtp, send_brevo, send_resend):
+        if fn(subject, recipients, body, report_path, sender_name):
+            return
+    print("[email] all methods failed or unconfigured")
+    sys.exit(1)
 
 
 if __name__ == "__main__":

@@ -12,6 +12,7 @@ GitHub Actions（cron 每天 01:00 UTC / 北京 09:00，或手动触发）
   ├─ opencode run --pure --auto --model 0815/agnes-2.5-flash \
   │     读取 SKILL.md → 全球扫描模式 → 报告写入 reports/regulation-digest-YYYY-MM-DD.md
   ├─ 上传报告为 Artifact（即使邮件失败也可在 Actions 页面下载）
+  ├─ 将进化后的 knowledge base（memory/、MEMORY.md、SKILL.md）与当日报告 git commit + push 回仓库（自动进化）
   └─ dawidd6/action-send-mail 通过 SMTP 发送报告到 DIGEST_TO
 ```
 
@@ -42,6 +43,7 @@ GitHub Actions（cron 每天 01:00 UTC / 北京 09:00，或手动触发）
 
 - **CHECKPOINT 自动通过**：skill 中的 🔴 CHECKPOINT 本需人工确认，CI 用 `--auto` 无人值守自动继续。
 - **成本**：每次运行会做大量模型调用（16 市场扫描），注意 agnes 免费额度。
-- **知识库不回写**：agent 运行中更新的 `memory/*.md` 在 runner 上是临时文件，job 结束即丢弃；
-  下次运行从仓库内已提交的 `memory/regulation-knowledge-base.md` 出发。如需长期沉淀，请本地运行 skill 提交更新。
+- **自动进化（知识库回写）**：agent 运行中更新的 `memory/*.md`、`MEMORY.md`、报告 `reports/regulation-digest-*.md`
+  会在每次运行后自动 `git commit + push` 回本仓库（需要 `contents: write` 权限，已开启）。
+  因此下一次定时运行会从**已进化的知识库**出发，实现持续自我进化；你也可以在 GitHub 上直接看到知识库与历史报告的累积。
 - **运行超时**：`opencode run` 设置了 60 分钟超时；超时则邮件会附上失败提示。

@@ -1,49 +1,47 @@
 # regulation-tracker（法规动态追踪 · 每日定时邮件）
 
-本仓库包含「法规动态追踪」skill，并通过 **GitHub Actions 每日定时** 启动 OpenCode 运行该 skill（联网抓取全球 16 个市场最新认证法规），将生成的报告通过邮件发送到指定邮箱。
+本仓库包含「法规动态追踪」skill，并通过 **GitLab CI 每日定时** 启动 OpenCode 运行该 skill（联网抓取全球 16 个市场最新认证法规），将生成的报告通过 **Brevo 免费 API** 发送到指定邮箱，并把进化后的知识库自动推回 GitHub 私有仓库。
+
+> 备选：仓库里仍保留 `.github/workflows/regulation-digest.yml`（GitHub Actions 版），但因私有仓库 GitHub Actions 被账户账单限制挡住（需付费计划/提升支出限额），改用 GitLab CI 作为可用的运行器。**无需信用卡**。
 
 ## 工作流程
 
 ```
-GitHub Actions（cron 每天 01:00 UTC / 北京 09:00，或手动触发）
-  ├─ checkout 仓库
-  ├─ 安装 OpenCode CLI
-  ├─ 写入 provider 配置（引用 AGNES_API_KEY）
-  ├─ opencode run --pure --auto --model 0815/agnes-2.5-flash \
+GitLab CI Schedule（cron 每天 01:00 UTC / 北京 09:00，或手动触发）
+  ├─ 拉取仓库（来自 GitHub 私有仓库的镜像或同仓库）
+  ├─ 安装 OpenCode CLI（node:20 镜像）
+  ├─ opencode run --pure --auto --model opencode/hy3-free \
   │     读取 SKILL.md → 全球扫描模式 → 报告写入 reports/regulation-digest-YYYY-MM-DD.md
-  ├─ 上传报告为 Artifact（即使邮件失败也可在 Actions 页面下载）
-  ├─ 将进化后的 knowledge base（memory/、MEMORY.md、SKILL.md）与当日报告 git commit + push 回仓库（自动进化）
-  └─ dawidd6/action-send-mail 通过 SMTP 发送报告到 DIGEST_TO
+  ├─ 将进化后的 knowledge base（memory/、MEMORY.md）与当日报告 git commit + push 回 GitHub 私有仓库（自动进化）
+  ├─ 上传报告为 Artifact（即使邮件失败也可在流水线页面下载）
+  └─ python3 scripts/send-digest.py 通过 Brevo 免费 API 发送报告到 DIGEST_TO
 ```
 
-## 你需要配置的 Secrets / Variables
+发信优先级（`scripts/send-digest.py`）：QQ SMTP → Brevo API → Resend API。本方案只配置 **Brevo**，因此实际走 Brevo。
 
-在仓库 **Settings → Secrets and variables → Actions** 中配置：
+## 在 GitLab 上配置（无需信用卡）
 
-| 名称 | 类型 | 说明 |
-|------|------|------|
-| `AGNES_API_KEY` | Secret（可选） | **兜底模型**密钥（agnes hub，对应 provider `0815`）。主模型用 OpenCode 免费模型 `opencode/hy3-free`（无需密钥）；仅当免费模型未产出报告且该密钥已配置时，才切换到 `0815/agnes-2.5-flash` 兜底。 |
-| `SMTP_SERVER` | Secret | 发件 SMTP 服务器，例如 `smtp.qq.com` |
-| `SMTP_PORT` | Secret | SMTP 端口，QQ 为 `465`（SSL） |
-| `SMTP_USERNAME` | Secret | 发件邮箱完整地址，例如 `xxxx@qq.com` |
-| `SMTP_PASSWORD` | Secret | 发件邮箱的**授权码**（非登录密码；QQ 邮箱在「设置→账户→开启SMTP」获取） |
-| `DIGEST_TO` | Variable | 收件邮箱，逗号分隔，例如 `494237963@qq.com,254840491@qq.com` |
+1. 把本仓库推到 GitLab（新建 Project → Import → 从 GitHub 导入，或 `git push` 到 GitLab）。
+2. **Settings → CI/CD → Variables**（逐项添加，勾选 `Masked`）：
+   | 名称 | 说明 |
+   |------|------|
+   | `GITHUB_TOKEN` | GitHub 个人访问令牌（勾选 `repo` 权限），用于把知识库推回 GitHub 私有仓库 |
+   | `BREVO_API_KEY` | Brevo 免费 API Key（Brevo 后台 → SMTP & API → API Keys） |
+   | `BREVO_SENDER` | 在 Brevo **已验证**的发件邮箱（必须验证，否则发送被拒） |
+   | `DIGEST_TO` | 收件邮箱，逗号分隔，例如 `494237963@qq.com,254840491@qq.com` |
+   | `AGNES_API_KEY` | （可选）兜底模型密钥；主模型 `opencode/hy3-free` 免费无需密钥 |
+3. **CI/CD → Schedules** 新建定时任务：Cron `0 1 * * *`、时区 UTC，对应北京 09:00。也可在流水线页面点 `Run pipeline`（来源 `web`）手动触发。
 
-> 邮件发送使用 `dawidd6/action-send-mail`（SMTP 方式）。GitHub Actions 本身**没有**内置邮件服务器，
-> 必须提供一个发件邮箱的 SMTP 凭证。对 QQ 收件箱而言，用 QQ 邮箱 `smtp.qq.com` 发信送达率最高。
->
-> 若你更想用 Resend：本仓库 `scripts/send-digest.py` 已支持 Resend（`RESEND_API_KEY` + `DIGEST_TO`），
-> 可在 workflow 中替换最后的发信步骤调用该脚本（需自行调整）。
+## 你需要准备的账号
 
-## 手动触发
-
-仓库 **Actions → regulation-digest-daily → Run workflow**。
+- **GitLab.com** 免费账号（无需信用卡）：免费私有仓库 + 400 分钟/月 CI。
+- **Brevo** 免费账号（无需信用卡）：9,000 封/月；在 Senders 里验证一个发件邮箱，拿到 API Key。
+- **GitHub 个人访问令牌**：用于知识库回推（在 GitHub → Settings → Developer settings → PAT 生成，勾 `repo`）。
 
 ## 注意事项
 
 - **CHECKPOINT 自动通过**：skill 中的 🔴 CHECKPOINT 本需人工确认，CI 用 `--auto` 无人值守自动继续。
-- **成本**：每次运行会做大量模型调用（16 市场扫描），注意 agnes 免费额度。
-- **自动进化（知识库回写）**：agent 运行中更新的 `memory/*.md`、`MEMORY.md`、报告 `reports/regulation-digest-*.md`
-  会在每次运行后自动 `git commit + push` 回本仓库（需要 `contents: write` 权限，已开启）。
-  因此下一次定时运行会从**已进化的知识库**出发，实现持续自我进化；你也可以在 GitHub 上直接看到知识库与历史报告的累积。
-- **运行超时**：`opencode run` 设置了 60 分钟超时；超时则邮件会附上失败提示。
+- **免费模型优先**：主模型 `opencode/hy3-free`（OpenCode 免费、无需密钥）；仅当它未产出报告且配置了 `AGNES_API_KEY` 时，才切换到 `0815/agnes-2.5-flash` 兜底。
+- **自动进化（知识库回写）**：每次运行更新的 `memory/*.md`、`MEMORY.md`、报告 `reports/regulation-digest-*.md` 会 `git commit + push` 回 GitHub 私有仓库；下一次运行从已进化的知识库出发，实现持续自我进化。
+- **运行超时**：`opencode run` 设置 60 分钟超时；超时则邮件附上失败提示。
+- **GitHub 默认分支**：本流水线推回 `HEAD:master`（本仓库默认分支为 `master`）；若你的 GitHub 仓库默认分支不同，请相应修改 `.gitlab-ci.yml` 里的 `git push origin HEAD:master`。

@@ -56,8 +56,16 @@ jobs:
           AGNES_API_KEY: ${{ secrets.AGNES_API_KEY }}
         run: |
           mkdir -p "$REPORT_DIR"
-          opencode run --pure --auto --model 0815/agnes-2.5-flash \
-            "读取仓库根目录的 SKILL.md，按其中『追踪流程』执行全球扫描模式（未限定产品范围，覆盖 16 个市场批量抓取最新法规动态）。完成搜索/筛选/定级/5步法影响分析后，按『报告模板』输出报告并保存到 $REPORT_DIR/regulation-digest-${{ env.REPORT_DATE }}.md。注意：这是无人值守的 CI 环境，不要等待人工 CHECKPOINT 确认，直接生成并保存报告文件。网络不可达时按『失败模式与兜底』标注待核实，绝不编造日期/限值。"
+          PROMPT="读取仓库根目录的 SKILL.md，按其中『追踪流程』执行全球扫描模式（未限定产品范围，覆盖 16 个市场批量抓取最新法规动态）。完成搜索/筛选/定级/5步法影响分析后，按『报告模板』输出报告并保存到 $REPORT_DIR/regulation-digest-${{ env.REPORT_DATE }}.md。注意：这是无人值守的 CI 环境，不要等待人工 CHECKPOINT 确认，直接生成并保存报告文件。网络不可达时按『失败模式与兜底』标注待核实，绝不编造日期/限值。"
+          set +e
+          echo "== 主模型: opencode/hy3-free（免费）=="
+          opencode run --pure --auto --model opencode/hy3-free "$PROMPT"
+          if [ ! -f "$REPORT_DIR/regulation-digest-${{ env.REPORT_DATE }}.md" ] && [ -n "$AGNES_API_KEY" ]; then
+            echo "== hy3 未产出报告，切换到 0815 兜底模型 =="
+            opencode run --pure --auto --model 0815/agnes-2.5-flash "$PROMPT"
+          elif [ ! -f "$REPORT_DIR/regulation-digest-${{ env.REPORT_DATE }}.md" ]; then
+            echo "hy3 未产出报告且未配置 AGNES_API_KEY 兜底，结束。"
+          fi
         timeout-minutes: 60
 
       - name: Ensure report exists (fallback on failure)

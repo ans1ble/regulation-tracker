@@ -17,19 +17,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set report date
-        run: echo "REPORT_DATE=$(date +%F)" >> "$GITHUB_ENV"
+      - name: Set report date (Asia/Shanghai)
+        run: |
+          export TZ=Asia/Shanghai
+          echo "REPORT_DATE=$(date +%F)" >> "$GITHUB_ENV"
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
       - name: Install OpenCode CLI
         run: npm install -g opencode-ai
 
       - name: Write OpenCode provider config
-        # CI 不读取仓库外的本地配置；此处按你本地 provider 写入最小配置（apiKey 用环境变量引用，不落盘密钥）
         run: |
           mkdir -p ~/.config/opencode
           cat > ~/.config/opencode/opencode.json <<'EOF'
@@ -55,10 +61,11 @@ jobs:
         env:
           AGNES_API_KEY: ${{ secrets.AGNES_API_KEY }}
         run: |
+          export TZ=Asia/Shanghai
           mkdir -p "$REPORT_DIR"
-          PROMPT="读取仓库根目录的 SKILL.md，按其中『追踪流程』执行全球扫描模式（未限定产品范围，覆盖 16 个市场批量抓取最新法规动态）。完成搜索/筛选/定级/5步法影响分析后，按『报告模板』输出报告并保存到 $REPORT_DIR/regulation-digest-${{ env.REPORT_DATE }}.md。注意：这是无人值守的 CI 环境，不要等待人工 CHECKPOINT 确认，直接生成并保存报告文件。网络不可达时按『失败模式与兜底』标注待核实，绝不编造日期/限值。"
+          PROMPT="你是法规追踪助手。请：1) 读取仓库根目录 SKILL.md 了解本 skill 的职责与结构；2) 以『全球扫描』模式联网检索最近一周全球 16 个主要市场的认证/法规动态（EU、US、CN、JP、KR、UK、DE、FR、IT、IN、BR、AU、CA、MX、SG、TW、HK 等），覆盖产品安全、无线电子、电池、RoHS/REACH、AI 监管等；3) 将结构化中文摘要写入 ${REPORT_DIR}/regulation-digest-${{ env.REPORT_DATE }}.md（含日期、地区、法规名称、影响、生效/废止时间、来源链接；不要编造日期或限额，未知标注『待核实』）；4) 如有更新，将新认知写入 memory/ 下 MEMORY.md 实现知识库进化；5) 全程无人值守，不要停下等人确认（SKILL.md 中的 CHECKPOINT 直接跳过）；6) 绝不编造数据。"
           set +e
-          echo "== 主模型: opencode/hy3-free（免费）=="
+          echo "== 主模型 opencode/hy3-free（免费）=="
           opencode run --pure --auto --model opencode/hy3-free "$PROMPT"
           if [ ! -f "$REPORT_DIR/regulation-digest-${{ env.REPORT_DATE }}.md" ] && [ -n "$AGNES_API_KEY" ]; then
             echo "== hy3 未产出报告，切换到 0815 兜底模型 =="
@@ -80,8 +87,6 @@ jobs:
 
       - name: Commit knowledge base evolution (自动进化)
         if: always()
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "regulation-bot"
           git config user.email "bot@users.noreply.github.com"
@@ -101,17 +106,17 @@ jobs:
           name: regulation-digest-${{ github.run_id }}
           path: ${{ env.REPORT_DIR }}/regulation-digest-*.md
 
-      - name: Send email via SMTP
+      - name: Send digest email (Brevo)
         if: always()
-        uses: dawidd6/action-send-mail@v3
-        with:
-          server_address: ${{ secrets.SMTP_SERVER }}
-          server_port: ${{ secrets.SMTP_PORT }}
-          username: ${{ secrets.SMTP_USERNAME }}
-          password: ${{ secrets.SMTP_PASSWORD }}
-          subject: 法规动态摘要 ${{ env.REPORT_DATE }}
-          from: ${{ secrets.SMTP_USERNAME }}
-          to: ${{ vars.DIGEST_TO }}
-          secure: true
-          convert_markdown: true
-          body: file://${{ env.REPORT_DIR }}/regulation-digest-${{ env.REPORT_DATE }}.md
+        env:
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          BREVO_SENDER: ${{ secrets.BREVO_SENDER }}
+          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          DIGEST_TO: ${{ vars.DIGEST_TO }}
+        run: |
+          python3 scripts/send-digest.py \
+            "$REPORT_DIR/regulation-digest-${{ env.REPORT_DATE }}.md" \
+            "法规动态摘要 ${{ env.REPORT_DATE }}" \
+            "$DIGEST_TO" \
+            "法规动态追踪"

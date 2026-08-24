@@ -1,122 +1,237 @@
 name: regulation-digest-daily
 
 on:
-  schedule:
-    - cron: "0 1 * * *"   # 每天 01:00 UTC（北京时间 09:00）
-  workflow_dispatch: {}    # 允许在 Actions 页面手动触发
+  schedule
+:
+    - cron: "0 1 * * *"   # 每天 01:00 UT
+C（北京时间 09:00）
+  workflow_dispatch
+: {}    # 允许在 Actions 页面手动触�
+�
 
 permissions:
-  contents: write   # 用于自动将进化后的知识库/报告推回仓库
+  contents: write   # 用于�
+��动将进化后的知识库/报告推回仓
+库
 
 jobs:
   run-skill-and-send:
-    runs-on: ubuntu-latest
+    runs-on:
+ ubuntu-latest
     env:
-      REPORT_DIR: reports
+      REPORT_DIR: rep
+orts
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+      
+  uses: actions/checkout@v4
 
-      - name: Set report date (Asia/Shanghai)
+      - name: Se
+t report date (Asia/Shanghai)
         run: |
+
           export TZ=Asia/Shanghai
-          echo "REPORT_DATE=$(date +%F)" >> "$GITHUB_ENV"
+          e
+cho "REPORT_DATE=$(date +%F)" >> "$GITHUB_ENV
+"
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: act
+ions/setup-node@v4
         with:
-          node-version: "20"
+          no
+de-version: "20"
 
       - name: Setup Python
+
         uses: actions/setup-python@v5
-        with:
+       
+ with:
           python-version: "3.11"
 
-      - name: Install OpenCode CLI
-        run: npm install -g opencode-ai
+    
+  - name: Install OpenCode CLI
+        run: n
+pm install -g opencode-ai
 
-      - name: Write OpenCode provider config
+      - name: Writ
+e OpenCode provider config
         run: |
-          mkdir -p ~/.config/opencode
-          cat > ~/.config/opencode/opencode.json <<'EOF'
+   
+       mkdir -p ~/.config/opencode
+          
+cat > ~/.config/opencode/opencode.json <<'EOF
+'
           {
-            "$schema": "https://opencode.ai/config.json",
-            "provider": {
+            "$schema": "https:/
+/opencode.ai/config.json",
+            "provi
+der": {
               "0815": {
-                "models": {
-                  "agnes-2.5-flash": { "name": "" }
+             
+   "models": {
+                  "agnes-2.5-f
+lash": { "name": "" }
                 },
-                "npm": "@ai-sdk/openai-compatible",
+    
+            "npm": "@ai-sdk/openai-compatible
+",
                 "options": {
-                  "apiKey": "{env:AGNES_API_KEY}",
-                  "baseURL": "https://apihub.agnes-ai.com/v1",
-                  "setCacheKey": true
+             
+     "apiKey": "{env:AGNES_API_KEY}",
+       
+           "baseURL": "https://apihub.agnes-a
+i.com/v1",
+                  "setCacheKey": t
+rue
                 }
               }
-            }
+       
+     }
           }
           EOF
 
-      - name: Run regulation-tracker skill (OpenCode)
-        env:
-          AGNES_API_KEY: ${{ secrets.AGNES_API_KEY }}
+      - nam
+e: Run regulation-tracker skill (OpenCode)
+  
+      env:
+          AGNES_API_KEY: ${{ secre
+ts.AGNES_API_KEY }}
         run: |
-          export TZ=Asia/Shanghai
-          mkdir -p "$REPORT_DIR"
-          PROMPT="你是法规追踪助手。请：1) 读取仓库根目录 SKILL.md 了解本 skill 的职责与结构；2) 以『全球扫描』模式联网检索最近一周全球 16 个主要市场的认证/法规动态（EU、US、CN、JP、KR、UK、DE、FR、IT、IN、BR、AU、CA、MX、SG、TW、HK 等），覆盖产品安全、无线电子、电池、RoHS/REACH、AI 监管等；3) 将结构化中文摘要写入 ${REPORT_DIR}/regulation-digest-${{ env.REPORT_DATE }}.md（含日期、地区、法规名称、影响、生效/废止时间、来源链接；不要编造日期或限额，未知标注『待核实』）；4) 如有更新，将新认知写入 memory/ 下 MEMORY.md 实现知识库进化；5) 全程无人值守，不要停下等人确认（SKILL.md 中的 CHECKPOINT 直接跳过）；6) 绝不编造数据。"
-          set +e
-          echo "== 主模型 opencode/hy3-free（免费）=="
-          opencode run --pure --auto --model opencode/hy3-free "$PROMPT"
-          if [ ! -f "$REPORT_DIR/regulation-digest-${{ env.REPORT_DATE }}.md" ] && [ -n "$AGNES_API_KEY" ]; then
-            echo "== hy3 未产出报告，切换到 0815 兜底模型 =="
-            opencode run --pure --auto --model 0815/agnes-2.5-flash "$PROMPT"
-          elif [ ! -f "$REPORT_DIR/regulation-digest-${{ env.REPORT_DATE }}.md" ]; then
-            echo "hy3 未产出报告且未配置 AGNES_API_KEY 兜底，结束。"
-          fi
+          
+export TZ=Asia/Shanghai
+          mkdir -p "$
+REPORT_DIR"
+          PROMPT="你是法规追
+踪助手。请：1) 读取仓库根目录 SK
+ILL.md 了解本 skill 的职责与结构；2
+) 以『全球扫描』模式联网检索最�
+��一周全球 16 个主要市场的认证/�
+�规动态（EU、US、CN、JP、KR、UK、DE
+、FR、IT、IN、BR、AU、CA、MX、SG、TW
+、HK 等），覆盖产品安全、无线电
+子、电池、RoHS/REACH、AI 监管等；3)
+ 将结构化中文摘要写入 ${REPORT_DIR}
+/regulation-digest-${{ env.REPORT_DATE }}.md�
+��含日期、地区、法规名称、影响�
+��生效/废止时间、来源链接；不要
+编造日期或限额，未知标注『待核
+实』）；4) 如有更新，将新认知写
+入 memory/ 下 MEMORY.md 实现知识库进�
+��；5) 全程无人值守，不要停下等�
+��确认（SKILL.md 中的 CHECKPOINT 直接�
+��过）；6) 绝不编造数据。"
+        
+  set +e
+          echo "== 主模型 opencod
+e/hy3-free（免费）=="
+          opencode 
+run --pure --auto --model opencode/hy3-free "
+$PROMPT"
+          if [ ! -f "$REPORT_DIR/reg
+ulation-digest-${{ env.REPORT_DATE }}.md" ] &
+& [ -n "$AGNES_API_KEY" ]; then
+            e
+cho "== hy3 未产出报告，切换到 0815 
+兜底模型 =="
+            opencode run --p
+ure --auto --model 0815/agnes-2.5-flash "$PRO
+MPT"
+          elif [ ! -f "$REPORT_DIR/regul
+ation-digest-${{ env.REPORT_DATE }}.md" ]; th
+en
+            echo "hy3 未产出报告且�
+�配置 AGNES_API_KEY 兜底，结束。"
+   
+       fi
         timeout-minutes: 60
 
-      - name: Ensure report exists (fallback on failure)
+      
+- name: Ensure report exists (fallback on fai
+lure)
         if: always()
         run: |
-          R="$REPORT_DIR/regulation-digest-${{ env.REPORT_DATE }}.md"
-          if [ ! -f "$R" ]; then
-            echo "# 法规动态摘要生成失败 ${{ env.REPORT_DATE }}" > "$R"
+   
+       R="$REPORT_DIR/regulation-digest-${{ e
+nv.REPORT_DATE }}.md"
+          if [ ! -f "$R
+" ]; then
+            echo "# 法规动态摘
+要生成失败 ${{ env.REPORT_DATE }}" > "$R
+"
             echo "" >> "$R"
-            echo "OpenCode 本次未生成报告文件，请检查 Actions 运行日志。" >> "$R"
-          fi
+            ech
+o "OpenCode 本次未生成报告文件，请
+检查 Actions 运行日志。" >> "$R"
+     
+     fi
 
-      - name: Commit knowledge base evolution (自动进化)
+      - name: Commit knowledge base 
+evolution (自动进化)
         if: always()
+
         run: |
-          git config user.name "regulation-bot"
-          git config user.email "bot@users.noreply.github.com"
-          git add -A
-          if git diff --cached --quiet; then
-            echo "本次无知识库/报告变更，跳过提交"
-          else
-            git commit -m "chore: 法规知识库自动进化 ${{ env.REPORT_DATE }}"
-            git push
-            echo "已推送进化后的知识库与报告"
-          fi
+          git config user.nam
+e "regulation-bot"
+          git config user.
+email "bot@users.noreply.github.com"
+        
+  git add -A
+          if git diff --cached -
+-quiet; then
+            echo "本次无知�
+�库/报告变更，跳过提交"
+          e
+lse
+            git commit -m "chore: 法规�
+��识库自动进化 ${{ env.REPORT_DATE }}"
+
+            git fetch origin master
+            git rebase origin/master
+            git push origin HEAD:master
+            echo "已推
+送进化后的知识库与报告"
+          
+fi
 
       - name: Upload report artifact
-        if: always()
-        uses: actions/upload-artifact@v4
+    
+    if: always()
+        uses: actions/upload
+-artifact@v4
         with:
-          name: regulation-digest-${{ github.run_id }}
-          path: ${{ env.REPORT_DIR }}/regulation-digest-*.md
+          name: re
+gulation-digest-${{ github.run_id }}
+        
+  path: ${{ env.REPORT_DIR }}/regulation-dige
+st-*.md
 
-      - name: Send digest email (Brevo)
+      - name: Send digest email (Bre
+vo)
         if: always()
         env:
-          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
-          BREVO_SENDER: ${{ secrets.BREVO_SENDER }}
-          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
-          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-          DIGEST_TO: ${{ vars.DIGEST_TO }}
+       
+   BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }
+}
+          BREVO_SENDER: ${{ secrets.BREVO_S
+ENDER }}
+          SMTP_USERNAME: ${{ secrets
+.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${
+{ secrets.SMTP_PASSWORD }}
+          DIGEST_T
+O: ${{ vars.DIGEST_TO }}
         run: |
-          python3 scripts/send-digest.py \
-            "$REPORT_DIR/regulation-digest-${{ env.REPORT_DATE }}.md" \
-            "法规动态摘要 ${{ env.REPORT_DATE }}" \
-            "$DIGEST_TO" \
-            "法规动态追踪"
+     
+     python3 scripts/send-digest.py \
+       
+     "$REPORT_DIR/regulation-digest-${{ env.R
+EPORT_DATE }}.md" \
+            "法规动态
+摘要 ${{ env.REPORT_DATE }}" \
+            
+"$DIGEST_TO" \
+            "法规动态追�
+�"
+
+

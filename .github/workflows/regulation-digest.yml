@@ -186,6 +186,7 @@ lse
             git commit -m "chore: 法规�
 ��识库自动进化 ${{ env.REPORT_DATE }}"
 
+            git fetch --unshallow >/dev/null 2>&1 || git fetch --deepen 100000 >/dev/null 2>&1
             git fetch origin master
             git rebase origin/master
             git push origin HEAD:master

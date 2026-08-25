@@ -2,14 +2,19 @@
 """Send the daily regulation digest report via email.
 
 Delivery order (first configured wins):
-  1. QQ SMTP  (smtp.qq.com:465, SSL)  - best deliverability to QQ inboxes
-  2. Brevo API (HTTPS/443)            - works even if SMTP port is blocked
-  3. Resend API (HTTPS/443)           - optional tertiary
+   1. QQ SMTP    (smtp.qq.com:465, SSL)  - best deliverability to QQ inboxes (fails on cloud IPs)
+   2. SendGrid   (HTTPS/443)             - works from CI cloud runners, no domain needed (trial)
+   3. Brevo API  (HTTPS/443)             - works even if SMTP port is blocked
+   4. Resend API (HTTPS/443)             - optional tertiary
 
 Required env (at least one method must be configured):
-  SMTP_USERNAME, SMTP_PASSWORD        -> QQ SMTP
-  BREVO_API_KEY                        -> Brevo (sender must be verified in Brevo)
-  RESEND_API_KEY                       -> Resend (sender must be verified in Resend)
+   SMTP_USERNAME, SMTP_PASSWORD        -> QQ SMTP
+   SENDGRID_API_KEY                     -> SendGrid (from = SENDER_EMAIL, must be verified single sender)
+   BREVO_API_KEY                        -> Brevo (sender must be verified in Brevo)
+   RESEND_API_KEY                       -> Resend (sender must be verified in Resend)
+
+Sender (From address) for API methods:
+   SENDER_EMAIL  (fallback to BREVO_SENDER / SMTP_USERNAME)
 
 Usage:
   send-digest.py <report.md> <subject> <to_csv> [sender_name]
@@ -59,6 +64,52 @@ def send_qq_smtp(subject, recipients, body_text, attachment_path, sender_name):
         return True
     except Exception as e:  # noqa: BLE001
         print(f"[email] QQ SMTP failed: {e}")
+        return False
+
+
+def send_sendgrid(subject, recipients, body_text, attachment_path, sender_name):
+    key = os.environ.get("SENDGRID_API_KEY")
+    if not key:
+        return False
+    sender_email = os.environ.get("SENDER_EMAIL") or os.environ.get("BREVO_SENDER") or os.environ.get("SMTP_USERNAME")
+    if not sender_email:
+        print("[email] SendGrid skipped: no SENDER_EMAIL set")
+        return False
+    payload = {
+        "personalizations": [{"to": [{"email": r} for r in recipients]}],
+        "from": {"email": sender_email, "name": sender_name},
+        "subject": subject,
+        "content": [{"type": "text/plain", "value": body_text}],
+    }
+    if attachment_path and os.path.isfile(attachment_path):
+        with open(attachment_path, "rb") as f:
+            b64 = base64.b64encode(f.read()).decode()
+        payload["attachments"] = [{
+            "content": b64,
+            "filename": os.path.basename(attachment_path),
+            "type": "application/octet-stream",
+            "disposition": "attachment",
+        }]
+    req = urllib.request.Request(
+        "https://api.sendgrid.com/v3/mail/send",
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            print(f"[email] sent via SendGrid (HTTP {resp.status})")
+        return True
+    except urllib.error.HTTPError as e:  # noqa: BLE001
+        detail = ""
+        try:
+            detail = e.read().decode("utf-8", "replace")[:300]
+        except Exception:  # noqa: BLE001
+            pass
+        print(f"[email] SendGrid failed: HTTP {e.code} {detail}")
+        return False
+    except Exception as e:  # noqa: BLE001
+        print(f"[email] SendGrid failed: {e}")
         return False
 
 
@@ -141,7 +192,7 @@ def main():
     with open(report_path, encoding="utf-8") as f:
         body = f.read()
 
-    for fn in (send_qq_smtp, send_brevo, send_resend):
+    for fn in (send_qq_smtp, send_sendgrid, send_brevo, send_resend):
         if fn(subject, recipients, body, report_path, sender_name):
             return
     print("[email] all methods failed or unconfigured")

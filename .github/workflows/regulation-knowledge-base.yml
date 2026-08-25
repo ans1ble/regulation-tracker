@@ -1,0 +1,96 @@
+name: regulation-knowledge-base
+
+on:
+  workflow_run:
+    workflows: ["regulation-digest-weekly"]
+    types: [completed]
+  workflow_dispatch: {}
+
+concurrency:
+  group: kb-update
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  update-kb:
+    runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set week (Asia/Shanghai)
+        run: |
+          export TZ=Asia/Shanghai
+          echo "WEEK=$(date +%G-W%V)" >> "$GITHUB_ENV"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install OpenCode CLI
+        run: npm install -g opencode-ai
+
+      - name: Write OpenCode provider config
+        run: |
+          mkdir -p ~/.config/opencode
+          cat > ~/.config/opencode/opencode.json <<'EOF'
+          {
+            "$schema": "https://opencode.ai/config.json",
+            "provider": {
+              "0815": {
+                "models": {
+                  "agnes-2.5-flash": { "name": "" }
+                },
+                "npm": "@ai-sdk/openai-compatible",
+                "options": {
+                  "apiKey": "{env:AGNES_API_KEY}",
+                  "baseURL": "https://apihub.agnes-ai.com/v1",
+                  "setCacheKey": true
+                }
+              }
+            }
+          }
+          EOF
+
+      - name: Update knowledge base (OpenCode)
+        env:
+          AGNES_API_KEY: ${{ secrets.AGNES_API_KEY }}
+        run: |
+          export TZ=Asia/Shanghai
+          REPORT="reports/$(date +%G)/weekly/regulation-digest-${{ env.WEEK }}.md"
+          PROMPT="你是法规追踪知识库维护助手。请：1) 读取仓库根目录 SKILL.md 与 memory/README.md 了解知识库结构与分工；2) 读取最近一期周报 ${REPORT}（若不存在则读取 reports/ 下最新的周报）；3) 将其中『当前状态』层级的事实（法规名称、市场、状态、生效日期、要求、来源链接）以『就地更新』方式写入 memory/regulation-knowledge-base.md：每条法规仅保留一行，新增则追加行、已有则更新对应单元格，绝不写叙述性长文；必须用『来源周报』列回链到对应周报（如 ${{ env.WEEK }}）；4) 必要时同步更新根目录 MEMORY.md 索引；5) 全程无人值守，不要停下等人确认，绝不编造数据；6) 严禁修改 reports/ 下任何文件。"
+          set +e
+          echo "== 主模型 opencode/hy3-free（免费）=="
+          opencode run --pure --auto --model opencode/hy3-free "$PROMPT"
+          if [ ! -f memory/regulation-knowledge-base.md ] && [ -n "$AGNES_API_KEY" ]; then
+            echo "== hy3 未产出，切换到 0815 兜底模型 =="
+            opencode run --pure --auto --model 0815/agnes-2.5-flash "$PROMPT"
+          fi
+        timeout-minutes: 60
+
+      - name: Commit knowledge base (only memory/)
+        if: always()
+        run: |
+          git config user.name "regulation-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add memory/
+          git checkout -- .
+          if git diff --cached --quiet; then
+            echo "知识库本次无变更，跳过提交"
+          else
+            git commit -m "chore: 知识库自动进化 ${{ env.WEEK }}"
+            git fetch --unshallow >/dev/null 2>&1 || git fetch --deepen 100000 >/dev/null 2>&1
+            git fetch origin master
+            git rebase origin/master
+            git push origin HEAD:master
+            echo "已推送进化后的知识库"
+          fi

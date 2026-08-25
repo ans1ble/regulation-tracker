@@ -1,3 +1,17 @@
+# Dependencies / build caches
 node_modules/
 __pycache__/
+*.pyc
+
+# Local environment / secrets
+.env
+.env.*
+*.local
+
+# OpenCode local state
 .opencode/
+
+# Scratch / generated run artifacts (not project source)
+body.json
+today_report.md
+test-prompts.json

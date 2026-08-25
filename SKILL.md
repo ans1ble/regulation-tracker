@@ -59,6 +59,29 @@ description: 追踪世界各国产品认证法规的最新动态（新规发布�
 | 🇨🇱 智利 | SEC 电气认证（PE 1/40:2023） | SEC |
 | 🇳🇬 尼日利亚 | SONCAP（进口）、NCC（无线） | SON、NCC |
 
+### 必查法规领域矩阵（覆盖度自检）
+
+> 每期「全球扫描」应逐市场覆盖下列领域；任一市场某领域本期无更新须**如实标注"未发现更新"**，不得静默跳过。CI 生成周报后可用此矩阵核对缺漏。
+
+| 市场 | 产品安全 | 无线/电信 | 电池 | 化学(RoHS·REACH·PFAS) | 能效 | AI/数字 |
+|------|:---:|:---:|:---:|:---:|:---:|:---:|
+| 🇨🇳 中国 | ● | SRRC | ● | RoHS | ● | ● |
+| 🇪🇺 欧洲 | GPSR | RED | ● | REACH/PPWR | ESPR | AI Act |
+| 🇺🇸 美国 | CPSC | FCC | ● | Prop65 | DOE | NIST RMF |
+| 🇯🇵 日本 | PSE | MIC/TELEC | ● | — | TOP | — |
+| 🇰🇷 韩国 | KC | RRA | ● | — | — | AI Basic Act |
+| 🇦🇺 澳洲 | — | ACMA | — | — | GEMS | — |
+| 🇧🇷 巴西 | INMETRO | ANATEL | ● | — | — | — |
+| 🇮🇳 印度 | BIS | WPC/TEC | — | — | — | — |
+| 🇷🇺 俄/EAEU | EAC | — | — | — | — | — |
+| 🇻🇳🇮🇩🇹🇭 东南亚 | CR/SNI/TISI | MIC/SDPPI/NBTC | ● | — | ● | — |
+| 🇲🇽 墨西哥 | NOM | — | — | — | NOM-ENER | — |
+| 🇸🇦 沙特 | SASO | CITC | — | — | — | — |
+| 🇨🇦 加拿大 | ISED | ISED | ● | — | NRCan | — |
+| 🇹🇷 土耳其 | CE/AEEE | — | ● | — | — | — |
+| 🇨🇱 智利 | SEC | — | — | — | — | — |
+| 🇳🇬 尼日利亚 | SONCAP | NCC | — | — | — | — |
+
 ## 法规类型速查（跨市场横向）
 
 > ⚠️ 仅名称级索引；具体生效日期/限值/适用产品以官方公告为准，禁止凭记忆填写（见「绝不做」）。
@@ -201,7 +224,7 @@ description: 追踪世界各国产品认证法规的最新动态（新规发布�
    - **配套脚本**：`scripts/send-digest.py --to 邮箱 --report 报告文件.md`（仓库内，见下方说明）
 3. 发送失败 → **如实告知错误**（如 401 密钥无效/邮箱非法），报告保留在对话中，不静默丢弃
 
-**每周自动发送（CI 定时）**：`.github/workflows/regulation-digest.yml` 每周日 00:00 运行，基于**已核实知识库**生成摘要并发送。自动摘要标注"静态摘要（基于已核实知识库）；最新动态请运行本 skill 获取"——CI 无法联网搜索，不做增量抓取。
+**每周自动发送（CI 定时）**：`.github/workflows/regulation-digest.yml` 每周日北京时间 09:00（cron `0 1 * * 0`）联网生成周报，写入 `reports/<年份>/weekly/regulation-digest-<YYYY-Www>.md`；`.github/workflows/regulation-monthly.yml` 每月 1 日汇总上月周报为月报，写入 `reports/<年份>/monthly/regulation-digest-<YYYY-MM>.md`（离线聚合，不联网）。年份由 `date +%G` 动态决定，跨年自动归档到对应目录。
 
 **配置要求**：
 - 环境变量 `RESEND_API_KEY`（必填；CI 用 GitHub Secrets，本地用 `.env`）

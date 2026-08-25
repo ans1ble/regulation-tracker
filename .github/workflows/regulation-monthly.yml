@@ -1,0 +1,98 @@
+name: regulation-digest-monthly
+
+on:
+  schedule:
+    - cron: "0 2 1 * *"   # 每月 1 日 02:00 UTC（北京时间 10:00），汇总上月周报
+  workflow_dispatch: {}    # 允许在 Actions 页面手动触发
+
+permissions:
+  contents: write
+
+jobs:
+  monthly-rollup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set previous month (Asia/Shanghai)
+        run: |
+          export TZ=Asia/Shanghai
+          echo "PREV_YEAR=$(date -d "last month" +%Y)" >> "$GITHUB_ENV"
+          echo "PREV_MONTH=$(date -d "last month" +%m)" >> "$GITHUB_ENV"
+          echo "MONTHLY_DIR=reports/$(date -d "last month" +%Y)/monthly" >> "$GITHUB_ENV"
+          echo "MONTHLY_PATH=reports/$(date -d "last month" +%Y)/monthly/regulation-digest-$(date -d "last month" +%Y)-$(date -d "last month" +%m).md" >> "$GITHUB_ENV"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install OpenCode CLI
+        run: npm install -g opencode-ai
+
+      - name: Write OpenCode provider config
+        run: |
+          mkdir -p ~/.config/opencode
+          cat > ~/.config/opencode/opencode.json <<'EOF'
+          {
+            "$schema": "https://opencode.ai/config.json",
+            "provider": {
+              "0815": {
+                "models": {
+                  "agnes-2.5-flash": { "name": "" }
+                },
+                "npm": "@ai-sdk/openai-compatible",
+                "options": {
+                  "apiKey": "{env:AGNES_API_KEY}",
+                  "baseURL": "https://apihub.agnes-ai.com/v1",
+                  "setCacheKey": true
+                }
+              }
+            }
+          }
+          EOF
+
+      - name: Generate monthly rollup from weekly reports (offline)
+        env:
+          AGNES_API_KEY: ${{ secrets.AGNES_API_KEY }}
+        run: |
+          export TZ=Asia/Shanghai
+          mkdir -p "$MONTHLY_DIR"
+          PROMPT="你是法规追踪助手，请生成本月汇总。步骤：1) 读取仓库根目录 SKILL.md；2) 读取目录 reports/${{ env.PREV_YEAR }}/weekly/ 下的全部周报文件；3) 从每份周报提取『报告日期』，收集报告日期落在 ${{ env.PREV_YEAR }}-${{ env.PREV_MONTH }} 的周报；4) 将筛选出的周报按市场（参照 SKILL.md 追踪范围表）合并为一份月度汇总，写入 ${{ env.MONTHLY_PATH }}，每条动态保留来源链接与生效日期；5) 若该月某周缺周报，在汇总中如实标注『第X周周报缺失』；6) 这是基于已有周报的离线聚合，禁止联网搜索、禁止编造；7) 全程无人值守。"
+          set +e
+          echo "== 主模型 opencode/hy3-free（免费）=="
+          opencode run --pure --auto --model opencode/hy3-free "$PROMPT"
+          if [ ! -f "$MONTHLY_PATH" ] && [ -n "$AGNES_API_KEY" ]; then
+            echo "== hy3 未产出，切换到 0815 兜底模型 =="
+            opencode run --pure --auto --model 0815/agnes-2.5-flash "$PROMPT"
+          fi
+        timeout-minutes: 60
+
+      - name: Ensure monthly report exists (fallback)
+        if: always()
+        run: |
+          R="${{ env.MONTHLY_PATH }}"
+          if [ ! -f "$R" ]; then
+            mkdir -p "$(dirname "$R")"
+            echo "# 法规动态月度汇总生成失败 ${{ env.PREV_YEAR }}-${{ env.PREV_MONTH }}" > "$R"
+            echo "" >> "$R"
+            echo "OpenCode 本次未生成月度汇总，请检查 Actions 运行日志。" >> "$R"
+          fi
+
+      - name: Commit monthly rollup
+        if: always()
+        run: |
+          git config user.name "regulation-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add "$MONTHLY_DIR" memory/
+          if git diff --cached --quiet; then
+            echo "本次无月度汇总变更，跳过提交"
+          else
+            git commit -m "chore: 法规月度汇总自动生成 ${{ env.PREV_YEAR }}-${{ env.PREV_MONTH }}"
+            git fetch --unshallow >/dev/null 2>&1 || git fetch --deepen 100000 >/dev/null 2>&1
+            git fetch origin master
+            git rebase origin/master
+            git push origin HEAD:master
+            echo "已推送月度汇总"
+          fi

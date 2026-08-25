@@ -117,6 +117,8 @@ jobs:
           SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
           DIGEST_TO: ${{ vars.DIGEST_TO }}
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
         run: |
           python3 scripts/send-digest.py \
             "$REPORT_DIR/regulation-digest-${{ env.REPORT_DATE }}.md" \

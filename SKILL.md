@@ -161,7 +161,7 @@ description: 追踪世界各国产品认证法规的最新动态（新规发布�
 
 ## 报告模板
 
-按输出类型分节，与 `templates/hw-regulation-tracker-report-template.md` 一致（完整版见模板文件）：
+按输出类型分节，与 `templates/regulation-tracker-report-template.md` 一致（完整版见模板文件）：
 
 ```markdown
 # 法规动态追踪报告
@@ -224,7 +224,17 @@ description: 追踪世界各国产品认证法规的最新动态（新规发布�
    - **配套脚本**：`scripts/send-digest.py --to 邮箱 --report 报告文件.md`（仓库内，见下方说明）
 3. 发送失败 → **如实告知错误**（如 401 密钥无效/邮箱非法），报告保留在对话中，不静默丢弃
 
-**每周自动发送（CI 定时）**：`.github/workflows/regulation-digest.yml` 每周日北京时间 09:00（cron `0 1 * * 0`）联网生成周报，写入 `reports/<年份>/weekly/regulation-digest-<YYYY-Www>.md`；`.github/workflows/regulation-monthly.yml` 每月 1 日汇总上月周报为月报，写入 `reports/<年份>/monthly/regulation-digest-<YYYY-MM>.md`（离线聚合，不联网）。年份由 `date +%G` 动态决定，跨年自动归档到对应目录。
+**自动生成（CI 定时，五种节奏）**：
+
+| 节奏 | 工作流文件 | cron（UTC） | 输出路径 |
+|------|-----------|-------------|----------|
+| 日报 | `regulation-digest-daily.yml` | `0 1 * * *` | `reports/<年>/daily/regulation-digest-YYYY-MM-DD.md` |
+| 周报 | `regulation-digest.yml` | `0 1 * * 0` | `reports/<年>/weekly/regulation-digest-YYYY-Www.md` |
+| 月报 | `regulation-monthly.yml` | `0 2 1 * *` | `reports/<年>/monthly/regulation-digest-YYYY-MM.md` |
+| 季报 | `regulation-quarterly.yml` | `0 2 1 1,4,7,10 *` | `reports/<年>/quarterly/regulation-digest-YYYY-Qn.md` |
+| 年报 | `regulation-annual.yml` | `0 3 1 1 *` | `reports/<年>/annual/regulation-digest-YYYY.md` |
+
+日报/周报联网检索最新动态；月报/季报/年报为基于已有周报的**离线聚合**，不联网、不编造。年份由 `date` 动态决定，跨年自动归档到对应目录。
 
 **配置要求**：
 - 环境变量 `RESEND_API_KEY`（必填；CI 用 GitHub Secrets，本地用 `.env`）
@@ -273,4 +283,4 @@ description: 追踪世界各国产品认证法规的最新动态（新规发布�
 
 ## 📋 报告模板
 
-> 输出报告请使用 [hw-regulation-tracker-report-template.md](templates/hw-regulation-tracker-report-template.md)（按「输出规范」章节生成的骨架，填写时保持量化阈值与故障编码表一致）。
+> 输出报告请使用 [regulation-tracker-report-template.md](templates/regulation-tracker-report-template.md)（按「输出规范」章节生成的骨架，填写时保持量化阈值与故障编码表一致）。

@@ -1,12 +1,12 @@
-name: regulation-digest-weekly
+name: regulation-digest-daily
 
 on:
   schedule:
-    - cron: "0 1 * * 0"   # 每周日 01:00 UTC（北京时间 周日 09:00）
+    - cron: "0 1 * * *"   # 每天 01:00 UTC（北京时间 09:00）
   workflow_dispatch: {}    # 允许在 Actions 页面手动触发
 
 permissions:
-  contents: write   # 用于自动将进化后的知识库/报告推回仓库
+  contents: write
 
 jobs:
   run-skill-and-send:
@@ -15,13 +15,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set report date (Asia/Shanghai) and dynamic year/week path
+      - name: Set report date (Asia/Shanghai) and dynamic year path
         run: |
           export TZ=Asia/Shanghai
-          echo "YEAR=$(date +%G)" >> "$GITHUB_ENV"
-          echo "WEEK=$(date +%G-W%V)" >> "$GITHUB_ENV"
-          echo "REPORT_DIR=reports/$(date +%G)/weekly" >> "$GITHUB_ENV"
-          echo "REPORT_PATH=reports/$(date +%G)/weekly/regulation-digest-$(date +%G-W%V).md" >> "$GITHUB_ENV"
+          echo "YEAR=$(date +%Y)" >> "$GITHUB_ENV"
+          echo "DATE=$(date +%F)" >> "$GITHUB_ENV"
+          echo "REPORT_DIR=reports/$(date +%Y)/daily" >> "$GITHUB_ENV"
+          echo "REPORT_PATH=reports/$(date +%Y)/daily/regulation-digest-$(date +%F).md" >> "$GITHUB_ENV"
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -64,7 +64,7 @@ jobs:
         run: |
           export TZ=Asia/Shanghai
           mkdir -p "$REPORT_DIR"
-          PROMPT="你是法规追踪助手。请：1) 读取仓库根目录 SKILL.md 了解本 skill 的职责与结构；2) 以『全球扫描』模式联网检索最近一周（按 ISO 周 ${{ env.WEEK }} 维度组织）全球 16 个主要市场的认证/法规动态（参照 SKILL.md『追踪范围』表的全部 16 个市场：中国、欧盟、美国、日本、韩国、英国、澳洲、巴西、印度、俄罗斯/EAEU、东南亚越南/印尼/泰、墨西哥、沙特、加拿大、土耳其、智利、尼日利亚），覆盖产品安全、无线电子、电池、RoHS/REACH/PFAS、能效、AI 监管等；3) 将结构化中文摘要写入 ${{ env.REPORT_PATH }}（含日期、地区、法规名称、影响、生效/废止时间、来源链接；不要编造日期或限额，未知标注『待核实』）；4) 如有更新，将新认知写入 memory/ 下 MEMORY.md 实现知识库进化；5) 全程无人值守，不要停下等人确认（SKILL.md 中的 CHECKPOINT 直接跳过）；6) 绝不编造数据。"
+          PROMPT="你是法规追踪助手。请：1) 读取仓库根目录 SKILL.md 了解本 skill 的职责与结构；2) 以『全球扫描』模式联网检索最近 24 小时全球 16 个主要市场的认证/法规动态（参照 SKILL.md『追踪范围』表的全部 16 个市场），覆盖产品安全、无线电子、电池、RoHS/REACH/PFAS、能效、AI 监管等；3) 将结构化中文摘要写入 ${{ env.REPORT_PATH }}（含日期、地区、法规名称、影响、生效/废止时间、来源链接；不要编造日期或限额，未知标注『待核实』）；4) 如有更新，将新认知写入 memory/ 下 MEMORY.md 实现知识库进化；5) 全程无人值守（SKILL.md 中的 CHECKPOINT 直接跳过）；6) 绝不编造数据。"
           set +e
           echo "== 主模型 opencode/hy3-free（免费）=="
           opencode run --pure --auto --model opencode/hy3-free "$PROMPT"
@@ -82,7 +82,7 @@ jobs:
           R="${{ env.REPORT_PATH }}"
           if [ ! -f "$R" ]; then
             mkdir -p "$(dirname "$R")"
-            echo "# 法规动态摘要生成失败 ${{ env.WEEK }}" > "$R"
+            echo "# 法规动态摘要生成失败 ${{ env.DATE }}" > "$R"
             echo "" >> "$R"
             echo "OpenCode 本次未生成报告文件，请检查 Actions 运行日志。" >> "$R"
           fi
@@ -96,7 +96,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "本次无知识库/报告变更，跳过提交"
           else
-            git commit -m "chore: 法规知识库自动进化 ${{ env.WEEK }}"
+            git commit -m "chore: 法规知识库自动进化 ${{ env.DATE }}"
             git fetch --unshallow >/dev/null 2>&1 || git fetch --deepen 100000 >/dev/null 2>&1
             git fetch origin master
             git rebase origin/master
@@ -126,6 +126,6 @@ jobs:
         run: |
           python3 scripts/send-digest.py \
             "${{ env.REPORT_PATH }}" \
-            "法规动态摘要 ${{ env.WEEK }}" \
+            "法规动态摘要 ${{ env.DATE }}" \
             "$DIGEST_TO" \
             "法规动态追踪"

@@ -1,0 +1,9 @@
+title: 法规动态追踪
+description: 自动追踪全球产品法规动态（产品安全 / 无线 / 电池 / RoHS·REACH·PFAS / 能效 / AI 等）
+lang: zh-CN
+theme: jekyll-theme-cayman
+exclude:
+  - .gitlab-ci.yml
+  - README.md
+  - regulation-tracker
+  - docs

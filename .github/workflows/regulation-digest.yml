@@ -85,6 +85,12 @@ jobs:
             echo "OpenCode 本次未生成报告文件，请检查 Actions 运行日志。" >> "$R"
           fi
 
+      - name: Update landing page to latest report
+        if: always()
+        run: |
+          sed -i -E "s#法规动态摘要 [0-9-]+#法规动态摘要 ${{ env.REPORT_DATE }}#g" index.md
+          sed -i -E "s#regulation-digest-[0-9-]+\.html#regulation-digest-${{ env.REPORT_DATE }}.html#g" index.md
+
       - name: Commit knowledge base evolution (自动进化)
         if: always()
         run: |

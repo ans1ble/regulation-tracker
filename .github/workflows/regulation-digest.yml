@@ -110,7 +110,7 @@ jobs:
           path: ${{ env.REPORT_DIR }}/regulation-digest-*.md
 
       - name: Send digest email (Brevo)
-        if: always()
+        if: false
         env:
           BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
           BREVO_SENDER: ${{ secrets.BREVO_SENDER }}

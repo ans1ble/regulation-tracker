@@ -92,7 +92,8 @@ jobs:
             git commit -m "chore: 法规月度汇总自动生成 ${{ env.PREV_YEAR }}-${{ env.PREV_MONTH }}"
             git fetch --unshallow >/dev/null 2>&1 || git fetch --deepen 100000 >/dev/null 2>&1
             git fetch origin master
-            git rebase origin/master
+            git checkout -- .
+          git rebase origin/master
             git push origin HEAD:master
             echo "已推送月度汇总"
           fi

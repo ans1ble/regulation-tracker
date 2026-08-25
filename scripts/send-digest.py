@@ -2,10 +2,10 @@
 """Send the daily regulation digest report via email.
 
 Delivery order (first configured wins):
-   1. SMTP       (SMTP_SERVER/SMTP_PORT, default smtp.qq.com:465) - best deliverability, fails on cloud IPs for CN providers
-   2. SendGrid   (HTTPS/443)             - works from CI cloud runners, no domain needed (trial)
-   3. Brevo API  (HTTPS/443)             - works even if SMTP port is blocked
-   4. Resend API (HTTPS/443)             - optional tertiary
+   1. Brevo API  (HTTPS/443)             - primary; works even if SMTP port is blocked (CI default)
+   2. Resend API (HTTPS/443)             - secondary API fallback
+   3. SendGrid   (HTTPS/443)             - tertiary API fallback
+   4. SMTP       (SMTP_SERVER/SMTP_PORT, default smtp.qq.com:465) - last resort; best deliverability but may fail on cloud IPs
 
 Required env (at least one method must be configured):
    SMTP_USERNAME, SMTP_PASSWORD        -> QQ SMTP
@@ -196,7 +196,7 @@ def main():
     with open(report_path, encoding="utf-8") as f:
         body = f.read()
 
-    for fn in (send_smtp, send_sendgrid, send_brevo, send_resend):
+    for fn in (send_brevo, send_resend, send_sendgrid, send_smtp):
         if fn(subject, recipients, body, report_path, sender_name):
             return
     print("[email] all methods failed or unconfigured")

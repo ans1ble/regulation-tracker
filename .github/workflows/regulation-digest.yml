@@ -87,6 +87,20 @@ jobs:
             echo "OpenCode 本次未生成报告文件，请检查 Actions 运行日志。" >> "$R"
           fi
 
+      - name: Summarize unverified (⚠️ 待核实) items
+        if: always()
+        run: |
+          R="${{ env.REPORT_PATH }}"
+          N=$(grep -c "⚠️" "$R" 2>/dev/null || true)
+          echo "本期报告含 ⚠️ 待核实 条目数: $N"
+          {
+            echo "## 本期未核实项统计 (${{ env.WEEK }})"
+            echo "- 待核实条目数: **$N**"
+            if [ "$N" -gt 0 ]; then
+              echo "- 建议后续由 CI 或人工优先核验这些条目的官方原文来源。"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Commit knowledge base evolution (自动进化)
         if: always()
         run: |

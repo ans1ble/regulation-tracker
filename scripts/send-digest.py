@@ -2,7 +2,7 @@
 """Send the daily regulation digest report via email.
 
 Delivery order (first configured wins):
-   1. QQ SMTP    (smtp.qq.com:465, SSL)  - best deliverability to QQ inboxes (fails on cloud IPs)
+   1. SMTP       (SMTP_SERVER/SMTP_PORT, default smtp.qq.com:465) - best deliverability, fails on cloud IPs for CN providers
    2. SendGrid   (HTTPS/443)             - works from CI cloud runners, no domain needed (trial)
    3. Brevo API  (HTTPS/443)             - works even if SMTP port is blocked
    4. Resend API (HTTPS/443)             - optional tertiary
@@ -49,21 +49,24 @@ def build_message(subject, recipients, body_text, attachment_path, sender_name):
     return msg
 
 
-def send_qq_smtp(subject, recipients, body_text, attachment_path, sender_name):
+def send_smtp(subject, recipients, body_text, attachment_path, sender_name):
     user = os.environ.get("SMTP_USERNAME")
     pwd = os.environ.get("SMTP_PASSWORD")
     if not (user and pwd):
         return False
+    host = os.environ.get("SMTP_SERVER", "smtp.qq.com")
+    port = int(os.environ.get("SMTP_PORT", "465"))
     try:
         msg = build_message(subject, recipients, body_text, attachment_path, user)
+        msg["From"] = f"{sender_name} <{user}>"
         ctx = ssl.create_default_context()
-        with smtplib.SMTP_SSL("smtp.qq.com", 465, context=ctx, timeout=30) as s:
+        with smtplib.SMTP_SSL(host, port, context=ctx, timeout=30) as s:
             s.login(user, pwd)
             s.sendmail(user, recipients, msg.as_string())
-        print("[email] sent via QQ SMTP")
+        print(f"[email] sent via SMTP ({host})")
         return True
     except Exception as e:  # noqa: BLE001
-        print(f"[email] QQ SMTP failed: {e}")
+        print(f"[email] SMTP ({host}) failed: {e}")
         return False
 
 
@@ -192,7 +195,7 @@ def main():
     with open(report_path, encoding="utf-8") as f:
         body = f.read()
 
-    for fn in (send_qq_smtp, send_sendgrid, send_brevo, send_resend):
+    for fn in (send_smtp, send_sendgrid, send_brevo, send_resend):
         if fn(subject, recipients, body, report_path, sender_name):
             return
     print("[email] all methods failed or unconfigured")

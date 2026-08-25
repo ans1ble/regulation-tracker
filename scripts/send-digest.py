@@ -57,12 +57,13 @@ def send_smtp(subject, recipients, body_text, attachment_path, sender_name):
     host = os.environ.get("SMTP_SERVER", "smtp.qq.com")
     port = int(os.environ.get("SMTP_PORT", "465"))
     try:
-        msg = build_message(subject, recipients, body_text, attachment_path, user)
-        msg["From"] = f"{sender_name} <{user}>"
+        from_addr = os.environ.get("BREVO_SENDER") or user
+        msg = build_message(subject, recipients, body_text, attachment_path, from_addr)
+        msg["From"] = f"{sender_name} <{from_addr}>"
         ctx = ssl.create_default_context()
         with smtplib.SMTP_SSL(host, port, context=ctx, timeout=30) as s:
             s.login(user, pwd)
-            s.sendmail(user, recipients, msg.as_string())
+            s.sendmail(from_addr, recipients, msg.as_string())
         print(f"[email] sent via SMTP ({host})")
         return True
     except Exception as e:  # noqa: BLE001

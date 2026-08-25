@@ -66,7 +66,7 @@ jobs:
         run: |
           export TZ=Asia/Shanghai
           mkdir -p "$QUARTERLY_DIR"
-          PROMPT="你是法规追踪助手，请生成本季度汇总。步骤：1) 读取仓库根目录 SKILL.md；2) 读取目录 reports/${{ env.PREV_YEAR }}/weekly/ 与 reports/${{ env.PREV_YEAR }}/monthly/ 下的全部报告；3) 从中筛选报告日期落在 ${{ env.PREV_YEAR }} 年第 ${{ env.Q }} 季度（Q${{ env.Q }}：1-3月 / 4-6月 / 7-9月 / 10-12月）的条目；4) 按市场（参照 SKILL.md 追踪范围表）合并为季度汇总，写入 ${{ env.QUARTERLY_PATH }}，保留来源链接与生效日期，并标注本季度内即将/已生效的关键节点；5) 若某周/月缺报告，如实标注缺失；6) 这是基于已有报告的离线聚合，禁止联网搜索、禁止编造；7) 全程无人值守。"
+          PROMPT="你是法规追踪助手，请生成本季度汇总。步骤：1) 读取 regulation-tracker/SKILL.md；2) 读取目录 reports/${{ env.PREV_YEAR }}/weekly/ 与 reports/${{ env.PREV_YEAR }}/monthly/ 下的全部报告；3) 从中筛选报告日期落在 ${{ env.PREV_YEAR }} 年第 ${{ env.Q }} 季度（Q${{ env.Q }}：1-3月 / 4-6月 / 7-9月 / 10-12月）的条目；4) 按市场（参照 SKILL.md 追踪范围表）合并为季度汇总，写入 ${{ env.QUARTERLY_PATH }}，保留来源链接与生效日期，并标注本季度内即将/已生效的关键节点；5) 若某周/月缺报告，如实标注缺失；6) 这是基于已有报告的离线聚合，禁止联网搜索、禁止编造；7) 全程无人值守。"
           set +e
           echo "== 主模型 opencode/hy3-free（免费）=="
           opencode run --pure --auto --model opencode/hy3-free "$PROMPT"

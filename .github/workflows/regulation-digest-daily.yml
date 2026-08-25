@@ -64,7 +64,7 @@ jobs:
         run: |
           export TZ=Asia/Shanghai
           mkdir -p "$REPORT_DIR"
-          PROMPT="你是法规追踪助手。请：1) 读取仓库根目录 SKILL.md 了解本 skill 的职责与结构；2) 以『全球扫描』模式联网检索最近 24 小时全球 16 个主要市场的认证/法规动态（参照 SKILL.md『追踪范围』表的全部 16 个市场），覆盖产品安全、无线电子、电池、RoHS/REACH/PFAS、能效、AI 监管等；3) 将结构化中文摘要写入 ${{ env.REPORT_PATH }}（含日期、地区、法规名称、影响、生效/废止时间、来源链接；不要编造日期或限额，未知标注『待核实』）；4) 如有更新，将新认知写入 memory/ 下 MEMORY.md 实现知识库进化；5) 全程无人值守（SKILL.md 中的 CHECKPOINT 直接跳过）；6) 绝不编造数据。"
+          PROMPT="你是法规追踪助手。请：1) 读取 regulation-tracker/SKILL.md 了解本 skill 的职责与结构；2) 以『全球扫描』模式联网检索最近 24 小时全球 16 个主要市场的认证/法规动态（参照 SKILL.md『追踪范围』表的全部 16 个市场），覆盖产品安全、无线电子、电池、RoHS/REACH/PFAS、能效、AI 监管等；3) 将结构化中文摘要写入 ${{ env.REPORT_PATH }}（含日期、地区、法规名称、影响、生效/废止时间、来源链接；不要编造日期或限额，未知标注『待核实』）；4) 知识库（regulation-tracker/memory/）由专门工作流 regulation-knowledge-base 统一维护，本任务【不要】写入或修改 regulation-tracker/memory/ 下任何文件，所有事实沉淀到日报即可；5) 全程无人值守（SKILL.md 中的 CHECKPOINT 直接跳过）；6) 绝不编造数据。"
           set +e
           echo "== 主模型 opencode/hy3-free（免费）=="
           opencode run --pure --auto --model opencode/hy3-free "$PROMPT"

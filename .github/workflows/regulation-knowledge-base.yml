@@ -67,22 +67,22 @@ jobs:
         run: |
           export TZ=Asia/Shanghai
           REPORT="reports/$(date +%G)/weekly/regulation-digest-${{ env.WEEK }}.md"
-          PROMPT="你是法规追踪知识库维护助手。请：1) 读取仓库根目录 SKILL.md 与 memory/README.md 了解知识库结构与分工；2) 读取最近一期周报 ${REPORT}（若不存在则读取 reports/ 下最新的周报）；3) 将其中『当前状态』层级的事实（法规名称、市场、状态、生效日期、要求、来源链接）以『就地更新』方式写入 memory/regulation-knowledge-base.md：每条法规仅保留一行，新增则追加行、已有则更新对应单元格，绝不写叙述性长文；必须用『来源周报』列回链到对应周报（如 ${{ env.WEEK }}）；4) 必要时同步更新根目录 MEMORY.md 索引；5) 全程无人值守，不要停下等人确认，绝不编造数据；6) 严禁修改 reports/ 下任何文件。"
+          PROMPT="你是法规追踪知识库维护助手。请：1) 读取 regulation-tracker/SKILL.md 与 regulation-tracker/memory/README.md 了解知识库结构与分工；2) 读取最近一期周报 ${REPORT}（若不存在则读取 reports/ 下最新的周报）；3) 将其中『当前状态』层级的事实（法规名称、市场、状态、生效日期、要求、来源链接）以『就地更新』方式写入 regulation-tracker/memory/regulation-knowledge-base.md：每条法规仅保留一行，新增则追加行、已有则更新对应单元格，绝不写叙述性长文；必须用『来源周报』列回链到对应周报（如 ${{ env.WEEK }}）；4) 必要时同步更新 regulation-tracker/MEMORY.md 索引；5) 全程无人值守，不要停下等人确认，绝不编造数据；6) 严禁修改 reports/ 下任何文件。"
           set +e
           echo "== 主模型 opencode/hy3-free（免费）=="
           opencode run --pure --auto --model opencode/hy3-free "$PROMPT"
-          if [ ! -f memory/regulation-knowledge-base.md ] && [ -n "$AGNES_API_KEY" ]; then
+          if [ ! -f regulation-tracker/memory/regulation-knowledge-base.md ] && [ -n "$AGNES_API_KEY" ]; then
             echo "== hy3 未产出，切换到 0815 兜底模型 =="
             opencode run --pure --auto --model 0815/agnes-2.5-flash "$PROMPT"
           fi
         timeout-minutes: 60
 
-      - name: Commit knowledge base (only memory/)
+      - name: Commit knowledge base (only regulation-tracker/memory/)
         if: always()
         run: |
           git config user.name "regulation-bot"
           git config user.email "bot@users.noreply.github.com"
-          git add memory/
+          git add regulation-tracker/memory/
           git checkout -- .
           if git diff --cached --quiet; then
             echo "知识库本次无变更，跳过提交"

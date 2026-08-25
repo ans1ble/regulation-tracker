@@ -2,7 +2,7 @@
 > ⚠️ 本文档为早期设计参考稿，已被实际实现取代。当前仓库使用 5 套 GitHub Actions 工作流（日报 / 周报 / 月报 / 季报 / 年报），详见 .github/workflows/ 与 index.md。此处保留仅供历史参考，请勿据此部署。
 # regulation-tracker × GitHub Actions × OpenCode 自动化方案
 
-> 状态：**设计参考稿**。本项目实际采用 `.github/workflows/regulation-digest.yml`（GitHub Actions 每周日运行，输出周报到 `reports/2026/weekly/`）。本文件记录最初的方案推演，软链接方案未落地（实际 workflow 直接读取仓库根目录 SKILL.md），发信走 Brevo（见 `scripts/send-digest.py`）。
+> 状态：**设计参考稿**。本项目实际采用 `.github/workflows/regulation-digest.yml`（GitHub Actions 每周日运行，输出周报到 `reports/2026/weekly/`）。本文件记录最初的方案推演，软链接方案未落地（实际 workflow 直接读取 `regulation-tracker/SKILL.md`），发信走 Brevo（见 `scripts/send-digest.py`）。
 
 > 目标：GitHub Actions 每周自动启动 OpenCode CLI 执行 regulation-tracker skill，实时抓取全球法规动态 → 生成报告 → Brevo 发信。
 

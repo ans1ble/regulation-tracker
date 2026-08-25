@@ -59,7 +59,7 @@ jobs:
         run: |
           export TZ=Asia/Shanghai
           mkdir -p "$MONTHLY_DIR"
-          PROMPT="你是法规追踪助手，请生成本月汇总。步骤：1) 读取仓库根目录 SKILL.md；2) 读取目录 reports/${{ env.PREV_YEAR }}/weekly/ 下的全部周报文件；3) 从每份周报提取『报告日期』，收集报告日期落在 ${{ env.PREV_YEAR }}-${{ env.PREV_MONTH }} 的周报；4) 将筛选出的周报按市场（参照 SKILL.md 追踪范围表）合并为一份月度汇总，写入 ${{ env.MONTHLY_PATH }}，每条动态保留来源链接与生效日期；5) 若该月某周缺周报，在汇总中如实标注『第X周周报缺失』；6) 这是基于已有周报的离线聚合，禁止联网搜索、禁止编造；7) 全程无人值守。"
+          PROMPT="你是法规追踪助手，请生成本月汇总。步骤：1) 读取 regulation-tracker/SKILL.md；2) 读取目录 reports/${{ env.PREV_YEAR }}/weekly/ 下的全部周报文件；3) 从每份周报提取『报告日期』，收集报告日期落在 ${{ env.PREV_YEAR }}-${{ env.PREV_MONTH }} 的周报；4) 将筛选出的周报按市场（参照 SKILL.md 追踪范围表）合并为一份月度汇总，写入 ${{ env.MONTHLY_PATH }}，每条动态保留来源链接与生效日期；5) 若该月某周缺周报，在汇总中如实标注『第X周周报缺失』；6) 这是基于已有周报的离线聚合，禁止联网搜索、禁止编造；7) 全程无人值守。"
           set +e
           echo "== 主模型 opencode/hy3-free（免费）=="
           opencode run --pure --auto --model opencode/hy3-free "$PROMPT"

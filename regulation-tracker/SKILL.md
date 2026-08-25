@@ -1,5 +1,5 @@
 ---
-name: hw-regulation-tracker
+name: regulation-tracker
 label: 法规动态追踪
 description: 追踪世界各国产品认证法规的最新动态（新规发布、生效倒计时、法规修订）。当用户询问"最近有什么法规更新"、"XX法规有什么新变化"、"新规什么时候生效"时使用。输出：法规动态列表+影响分析+行动建议。同时作为后台能力，持续学习最新法规并更新知识库。触发词：「法规更新」「法规变化」「新规生效」「CCC」「CE认证」「FCC」「电池法规」「合规要求」。
 ---
@@ -228,11 +228,11 @@ description: 追踪世界各国产品认证法规的最新动态（新规发布�
 
 | 节奏 | 工作流文件 | cron（UTC） | 输出路径 |
 |------|-----------|-------------|----------|
-| 日报 | `regulation-digest-daily.yml` | `0 1 * * *` | `reports/<年>/daily/regulation-digest-YYYY-MM-DD.md` |
-| 周报 | `regulation-digest.yml` | `0 1 * * 0` | `reports/<年>/weekly/regulation-digest-YYYY-Www.md` |
-| 月报 | `regulation-monthly.yml` | `0 2 1 * *` | `reports/<年>/monthly/regulation-digest-YYYY-MM.md` |
-| 季报 | `regulation-quarterly.yml` | `0 2 1 1,4,7,10 *` | `reports/<年>/quarterly/regulation-digest-YYYY-Qn.md` |
-| 年报 | `regulation-annual.yml` | `0 3 1 1 *` | `reports/<年>/annual/regulation-digest-YYYY.md` |
+| 日报 | `regulation-digest-daily.yml` | `0 1 * * *` | `../reports/<年>/daily/regulation-digest-YYYY-MM-DD.md` |
+| 周报 | `regulation-digest.yml` | `0 1 * * 0` | `../reports/<年>/weekly/regulation-digest-YYYY-Www.md` |
+| 月报 | `regulation-monthly.yml` | `0 2 1 * *` | `../reports/<年>/monthly/regulation-digest-YYYY-MM.md` |
+| 季报 | `regulation-quarterly.yml` | `0 2 1 1,4,7,10 *` | `../reports/<年>/quarterly/regulation-digest-YYYY-Qn.md` |
+| 年报 | `regulation-annual.yml` | `0 3 1 1 *` | `../reports/<年>/annual/regulation-digest-YYYY.md` |
 
 日报/周报联网检索最新动态；月报/季报/年报为基于已有周报的**离线聚合**，不联网、不编造。年份由 `date` 动态决定，跨年自动归档到对应目录。
 
@@ -245,7 +245,7 @@ description: 追踪世界各国产品认证法规的最新动态（新规发布�
 1. **立即更新** `memory/regulation-knowledge-base.md`（法规→状态/日期/要求/来源 + 「来源周报」链接）。**每个法规只保留一行，新动态就地更新该行，不追加重复行；不复制周报叙事，细节留在周报，用「来源周报」列链回。**
 2. **记录事件** `memory/YYYY-MM-DD.md`（当日发现+来源URL，agent 自身过程笔记，不与周报重复叙事）
 3. **提炼沉淀** → `MEMORY.md` 法规动态跟踪区
-- **周报 vs 知识库分工**：`reports/<year>/weekly/Wxx.md` 是时间线正史（某周发生什么），`memory/regulation-knowledge-base.md` 是当前状态快照（某法规现在怎样）；两者去重规则见 `memory/README.md`。
+- **周报 vs 知识库分工**：`../reports/<year>/weekly/Wxx.md` 是时间线正史（某周发生什么），`memory/regulation-knowledge-base.md` 是当前状态快照（某法规现在怎样）；两者去重规则见 `memory/README.md`。
 4. **🔴 更新前自查**：每条数据有官方来源背书、带更新日期；来源不明的不写入
 
 ## 绝不做（反例黑名单）

@@ -54,7 +54,7 @@ description: "法规动态追踪报告模板 — 按 hw-regulation-tracker 报�
 - [ ] 优先级标签（🔴/🟠/🟡/⚪）有且仅有一个，并注明定级依据
 - [ ] 已对照「产品范围」逐项核对受影响产品线，无遗漏
 - [ ] 已按 SKILL.md 的 🔴 CHECKPOINT 与使用者确认后才输出
-- [ ] 更新知识库：`memory/regulation-knowledge-base.md` + 当日 `memory/YYYY-MM-DD.md`
+- [ ] 更新知识库：`../memory/regulation-knowledge-base.md` + 当日 `../memory/YYYY-MM-DD.md`
 
 ## 结论与后续行动
 

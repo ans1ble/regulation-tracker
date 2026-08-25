@@ -59,7 +59,7 @@ jobs:
         run: |
           export TZ=Asia/Shanghai
           mkdir -p "$ANNUAL_DIR"
-          PROMPT="你是法规追踪助手，请生成 ${{ env.PREV_YEAR }} 年度法规回顾。步骤：1) 读取仓库根目录 SKILL.md；2) 读取目录 reports/${{ env.PREV_YEAR }}/ 下全部报告（weekly/、monthly/、quarterly/ 若有）；3) 按市场（参照 SKILL.md 追踪范围表 16 个市场）与法规类型（产品安全/无线/电池/化学/能效/AI）梳理全年关键动态，写入 ${{ env.ANNUAL_PATH }}，保留来源链接与生效日期；4) 提炼『年度关键生效节点』与『下一年度待办/预警』两节；5) 若部分周/月/季度报告缺失，如实标注；6) 这是基于已有报告的离线聚合，禁止联网搜索、禁止编造；7) 全程无人值守。"
+          PROMPT="你是法规追踪助手，请生成 ${{ env.PREV_YEAR }} 年度法规回顾。步骤：1) 读取 regulation-tracker/SKILL.md；2) 读取目录 reports/${{ env.PREV_YEAR }}/ 下全部报告（weekly/、monthly/、quarterly/ 若有）；3) 按市场（参照 SKILL.md 追踪范围表 16 个市场）与法规类型（产品安全/无线/电池/化学/能效/AI）梳理全年关键动态，写入 ${{ env.ANNUAL_PATH }}，保留来源链接与生效日期；4) 提炼『年度关键生效节点』与『下一年度待办/预警』两节；5) 若部分周/月/季度报告缺失，如实标注；6) 这是基于已有报告的离线聚合，禁止联网搜索、禁止编造；7) 全程无人值守。"
           set +e
           echo "== 主模型 opencode/hy3-free（免费）=="
           opencode run --pure --auto --model opencode/hy3-free "$PROMPT"

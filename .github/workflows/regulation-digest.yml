@@ -63,7 +63,7 @@ jobs:
         run: |
           export TZ=Asia/Shanghai
           mkdir -p "$REPORT_DIR"
-          PROMPT="你是法规追踪助手。请：1) 读取仓库根目录 SKILL.md 了解本 skill 的职责与结构；2) 以『全球扫描』模式联网检索2026 年 1 月 1 日至今（年初至今 YTD）全球 16 个主要市场的认证/法规动态（EU、US、CN、JP、KR、UK、DE、FR、IT、IN、BR、AU、CA、MX、SG、TW、HK 等），覆盖产品安全、无线电子、电池、RoHS/REACH、AI 监管等；3) 将结构化中文摘要写入 ${REPORT_DIR}/regulation-digest-${{ env.REPORT_DATE }}.md（含日期、地区、法规名称、影响、生效/废止时间、来源链接；不要编造日期或限额，未知标注『待核实』）；4) 如有更新，将新认知写入 memory/ 下 MEMORY.md 实现知识库进化；5) 全程无人值守，不要停下等人确认（SKILL.md 中的 CHECKPOINT 直接跳过）；6) 绝不编造数据。"
+          PROMPT="你是法规追踪助手。请：1) 读取仓库根目录 SKILL.md 了解本 skill 的职责与结构；2) 以『全球扫描』模式联网检索最近一周（按周维度组织）全球 16 个主要市场的认证/法规动态（EU、US、CN、JP、KR、UK、DE、FR、IT、IN、BR、AU、CA、MX、SG、TW、HK 等），覆盖产品安全、无线电子、电池、RoHS/REACH、AI 监管等；3) 将结构化中文摘要写入 ${REPORT_DIR}/regulation-digest-${{ env.REPORT_DATE }}.md（含日期、地区、法规名称、影响、生效/废止时间、来源链接；不要编造日期或限额，未知标注『待核实』）；4) 如有更新，将新认知写入 memory/ 下 MEMORY.md 实现知识库进化；5) 全程无人值守，不要停下等人确认（SKILL.md 中的 CHECKPOINT 直接跳过）；6) 绝不编造数据。"
           set +e
           echo "== 主模型 opencode/hy3-free（免费）=="
           opencode run --pure --auto --model opencode/hy3-free "$PROMPT"

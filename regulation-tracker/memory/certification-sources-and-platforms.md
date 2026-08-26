@@ -50,8 +50,14 @@
 |------|--------------|---------------------|------|----------|
 | Amazon | 类目合规文件审核（儿童 CPC、FCC 授权、能效标签、EU GPSR 欧代等），缺失即下架/禁售；FCC 26-50 平台 FCC ID 展示义务适用平台之一（Cat1 2027-03-01 起） | https://sellercentral.amazon.com ✅ | Amazon Seller Central 合规帮助页；FCC 26-50（见法规知识库） | 2026-08-26 |
 | Temu | 产品资质上传+平台审核抽检（CCC/CE/CPC/RSL 化学限值等）；资质过期管控；全托管/半托管模式差异 | 海外商家 https://seller.temu.com ✅ · 中国商家 https://seller.kuajingmaihuo.com ✅ | Temu 卖家中心官网 | 2026-08-26 |
-| SHEIN Marketplace | 分区域招商门户；商品上传需资质/检测报告；类目细则以卖家中心为准 ⚠️ 细节待核实 | 美国 https://seller-us.shein.com ✅ · 欧洲 https://seller-eu.shein.com ✅ · 中东 https://seller-me.shein.com ✅ | SHEIN Marketplace 官方门户 | 2026-08-26 |
-| Shopee | 各站点本地合规差异大：印尼 SDPPI/SNI、泰国 NBTC、越南 MIC CR 等；卖家大学有站点指引 ⚠️ 细节待核实 | https://seller.shopee.com ✅（各站点子域名） | Shopee 卖家中心 | 2026-08-26 |
+| SHEIN Marketplace（总览） | 卖家教育 Hub 提供分市场+分品类合规指引（产品安全要求、禁限售、质量标准、知识产权、入驻/上架/日常运营合规）；与 BV/Intertek/SGS/TÜV SÜD 合办产品安全合规培训系列（2026-05-29 起，首场儿童玩具）；治理框架含资质门槛+多层筛查+持续监测+AI 监测 | 官方公告 https://www.sheingroup.com/newsroom/shein-expands-marketplace-seller-education-offering-with-product-safety-and-quality-compliance ✅（2026-06-11） | SHEIN Group Newsroom | 2026-08-26 |
+| SHEIN 美国站入驻资质 | 门槛：年营收 ≥ $500 万 + 美国本土运营主体；特定品类须上传测试报告/安全证书等信息 | https://seller-us.shein.com/get-started-shein-marketplace ✅ | SHEIN Marketplace 官方门户 | 2026-08-26 |
+| SHEIN 欧洲站入驻资质 | 注册需营业执照、VAT 税号证明等文件；GPSR 下平台可能被认定为责任人 | https://seller-eu.shein.com ✅ · 注册文件清单据第三方 https://docs.m2ecloud.com/docs/shein-seller-registration-guide-eu/ ⚠️ 行业解读（官方清单待登录卖家中心确认） | M2E Cloud 解读 + 官方门户 | 2026-08-26 |
+| Shopee 印尼站 | Permendag 19/2026：所有线上经营者（含跨境）必须持 NIB 营业执照；跨境卖家另须提交合法化营业执照、产品标准合规证明、银行账户、印尼语商品描述；无证店铺限期清退（存量 18 个月/新卖家 6 个月宽限） | 官方卖家教育页 https://seller.shopee.co.id/edu/article/28082 ✅（2026-08-12 更新）；跨境细则 https://www.nusantaradfdl.com/insights/indonesia-ecommerce-regulation-permendag-19-2026/ ⚠️ 行业解读 | Shopee Indonesia Seller Education Hub + 行业解读 | 2026-08-26 |
+| Shopee 马来西亚站 | 通信设备：全部卖家所列商品必须有 MCMC Registration Number + SIRIM 标签；电器类：SIRIM 产品认证（1994 年电力条例法定要求） | 官方卖家教育页 https://seller.shopee.com.my/edu/article/26534 ✅（通信设备，2025-03-12）· https://seller.shopee.com.my/edu/article/1454 ✅（电器） | Shopee MY Seller Education Hub | 2026-08-26 |
+| Shopee 泰国站 | 重点品类须 TISI 认证并在商品详情填 TISI 认证链接（apptb.tisi.go.th 格式），未填者禁卖/删除；母婴玩具须 TISI 或泰国 FDA；ETDA《数字平台服务法》下卖家 KYC 实名核验 | 平台公告 2026-03-05 起 KYC（行业转述 https://www.dianxiaomi.com/blog/article/620 ⚠️）；TISI 链接要求（行业 https://www.haixingcang.com/nd.jsp?id=24 ⚠️）；官方原文待登录泰国站卖家中心核 | 行业解读（Shopee 官方教育页原文待抓取） | 2026-08-26 |
+| Shopee 菲律宾站 | 《互联网交易法》(ITA)：受管制类目强制上传类目许可与产品认证（PS/ICC/FDA 等），Shopee PH 自 2025-04-29 执行 | 见周报 2026-W35「电商平台合规动态」章节 ✅ | 2026-W35 周报 | 2026-08-26 |
+| Shopee 越南站 | 《电子商务法》（2026-07-01 生效）后分批执行账户实名核验（2026-07-08 起）；跨境直邮买家实名制（财政部 29/2025/TT-BTC，2025-08-01 起）；商品级 MIC CR 强制上传未见平台官方明文 | 行业报道 https://zhuanlan.zhihu.com/p/2058843834356855155 ⚠️ · https://www.ebrun.com/ebrungo/zb/587186.shtml ⚠️（知乎仅作线索，不作为事实依据，待官方教育页核实） | 行业报道（⚠️） | 2026-08-26 |
 
 ### 平台 × 法规联动关注点
 
@@ -59,4 +65,5 @@
 2. **美国 FCC 26-50 Third R&O**：电商平台须在点售处展示有效准确 FCC ID（Cat1 2027-03-01 / Cat2 2027-06-01）→ 出美无线产品提前自查证书有效性
 3. **平台政策快于法规**：平台自设检测项（RSL、包装标签、能效）常先于政府强制 → 每次全球扫描同步检索 `{平台} {市场} compliance/product requirement update {年份}`
 
-> ⚠️ 待核实项：SHEIN 各区域类目资质细则；Shopee 各站点强制认证清单原文；韩国 KC 查询域名（cert.safetykorea.kr）；印尼 KOMDIGI 域名改组后入口。
+> ⚠️ 待核实项（2026-08-26 复核后余量）：①SHEIN 欧洲站官方注册文件清单（现为第三方解读）；②Shopee 泰国站 TISI/KYC 官方教育页原文；③Shopee 越南站商品级 MIC CR 上传是否有平台官方明文（知乎线索不作事实依据）；④韩国 KC 查询域名（cert.safetykorea.kr）；⑤印尼 KOMDIGI 改组后入口。
+> 已核实升级：SHEIN 总览/美国站（官方门户+官方新闻room）、Shopee 印尼站 NIB（官方教育页 28082）、Shopee 马来站 MCMC/SIRIM（官方教育页 26534/1454）、Shopee 菲律宾站（W35 周报）。

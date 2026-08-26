@@ -99,8 +99,8 @@ description: 追踪世界各国产品认证法规的最新动态（新规发布�
 |------|--------------|---------------------|----------|
 | Amazon | 类目产品合规文件审核（CPC、FCC ID、能效标签、GPSR 欧代等），缺失即下架/禁售；受 FCC 26-50 平台 FCC ID 展示义务约束（Cat1 2027-03-01 起） | sellercentral.amazon.com ✅ | 2026-08-26 |
 | Temu | 产品资质上传+平台审核抽检（CCC/CE/CPC/RSL 等），资质过期管控；中国商家走拼多多跨境入口 | seller.temu.com ✅（海外商家）· seller.kuajingmaihuo.com ✅（中国商家） | 2026-08-26 |
-| SHEIN Marketplace | 分区域招商门户；商品需上传资质/检测报告，具体类目要求以卖家中心为准 ⚠️ 细节待核实 | seller-us.shein.com ✅ · seller-eu.shein.com ✅ · seller-me.shein.com ✅（中东） | 2026-08-26 |
-| Shopee | 各站点本地合规差异大（印尼 SDPPI/SNI、泰国 NBTC、越南 MIC CR 等）；卖家大学有站点合规指引 ⚠️ 细节待核实 | seller.shopee.com ✅ | 2026-08-26 |
+| SHEIN Marketplace | 卖家教育 Hub 分市场+分品类合规指引；美国站门槛：年营收 ≥$500 万+本土主体，特定品类须上传测试报告/安全证书；与 BV/Intertek/SGS/TÜV SÜD 合办合规培训（2026-05 起）⚠️ 欧洲站注册文件清单为第三方解读 | seller-us.shein.com ✅ · seller-eu.shein.com ✅ · seller-me.shein.com ✅（中东）· 官方公告 sheingroup.com/newsroom ✅ | 2026-08-26 |
+| Shopee | 各站点强制资质差异大：印尼 NIB（Permendag 19/2026）✅、马来 MCMC/SIRIM ✅、泰国 TISI 链接 ⚠️、菲律宾 ITA PS/ICC/FDA ✅、越南实名核验/电商法 ⚠️ | seller.shopee.com ✅（各站点 /edu/ 卖家教育页含官方原文，如 co.id/edu/article/28082、com.my/edu/article/26534） | 2026-08-26 |
 
 **平台 × 法规联动关注点**：
 1. **欧盟 GPSR/DSA**：平台对在售商品负欧代信息核验义务（意大利 GPSR 执行法令已强化在线平台义务，见知识库）→ 平台下架压力 = 合规倒逼信号

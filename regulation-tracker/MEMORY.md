@@ -18,7 +18,12 @@
 - 使用者要求增加「获取认证信息的途径」并纳入电商平台信息 → 已在 SKILL.md 新增「📡 认证信息获取途径」（各市场官方监管/证书查询入口清单）与「🛒 电商平台合规要求」（Amazon/Temu/SHEIN/Shopee）两节；全球扫描流程同步加入平台政策检索 query
 - 详细快照沉淀至 `memory/certification-sources-and-platforms.md`（每条带来源 URL + 更新日期）
 - 平台入口已核实：Amazon sellercentral.amazon.com ✅、Temu seller.temu.com / seller.kuajingmaihuo.com ✅（联网核实）、SHEIN seller-us/eu/me.shein.com ✅（联网核实）、Shopee seller.shopee.com ✅
-- ⚠️ 待核实：SHEIN/Shopee 类目资质细则原文；韩国 KC 查询域名；印尼 KOMDIGI 改组后入口
+## 自我更新记录（2026-08-26 · 第二次 · SHEIN/Shopee 类目资质联网核实）
+
+- 对上条记录中的 ⚠️ 待核项联网复核：
+  - **已升级 ✅**：SHEIN 总览（官方 Newsroom 2026-06-11：教育 Hub 分市场分品类指引+TIC 四巨头培训系列）、SHEIN 美国站门槛（年营收 ≥$500 万+本土主体）、Shopee 印尼 NIB（官方教育页 seller.shopee.co.id/edu/article/28082，Permendag 19/2026）、Shopee 马来 MCMC/SIRIM（官方教育页 com.my/edu/article/26534、1454）、Shopee 菲律宾 ITA（W35 周报）
+  - **维持 ⚠️**：SHEIN 欧洲站注册清单（仅第三方解读）、Shopee 泰国 TISI/KYC（行业转述）、Shopee 越南商品级 MIC CR 明文（知乎线索不作事实依据）；另韩国 KC 域名、印尼 KOMDIGI 入口仍未核
+- 详细更新见 `memory/certification-sources-and-platforms.md`（各平台拆分为逐站点行，带来源 URL + 更新日期）
 
 ## 自我更新记录（2026-08-16）
 

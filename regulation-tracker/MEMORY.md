@@ -1,6 +1,6 @@
 # MEMORY
 
-> 版本：hw-regulation-tracker v2.1（2026-08-16）· 追踪范围 16 市场 · 全球扫描模式 + 报告发送 + 自我更新机制
+> 版本：hw-regulation-tracker v2.2（2026-08-26）· 追踪范围 16 市场 + 认证信息官方渠道清单 + 电商平台合规（Amazon/Temu/SHEIN/Shopee）· 全球扫描模式 + 报告发送 + 自我更新机制
 
 ## 法规动态跟踪区
 
@@ -12,6 +12,13 @@
 - ⚠️ CCC 转第三方认证的「电缆」是否在列（产品范围待官方清单确认）
 - ⚠️ 智利 SEC 认证强制生效日期（PE 1/40:2023 已确认适用，生效日待官方公告）
 - ⚠️ 尼日利亚充电宝适用 NIS 标准号（SONCAP 程序已确认，标准号待官方发布）
+
+## 自我更新记录（2026-08-26 · 认证渠道 + 电商平台扩展）
+
+- 使用者要求增加「获取认证信息的途径」并纳入电商平台信息 → 已在 SKILL.md 新增「📡 认证信息获取途径」（各市场官方监管/证书查询入口清单）与「🛒 电商平台合规要求」（Amazon/Temu/SHEIN/Shopee）两节；全球扫描流程同步加入平台政策检索 query
+- 详细快照沉淀至 `memory/certification-sources-and-platforms.md`（每条带来源 URL + 更新日期）
+- 平台入口已核实：Amazon sellercentral.amazon.com ✅、Temu seller.temu.com / seller.kuajingmaihuo.com ✅（联网核实）、SHEIN seller-us/eu/me.shein.com ✅（联网核实）、Shopee seller.shopee.com ✅
+- ⚠️ 待核实：SHEIN/Shopee 类目资质细则原文；韩国 KC 查询域名；印尼 KOMDIGI 改组后入口
 
 ## 自我更新记录（2026-08-16）
 

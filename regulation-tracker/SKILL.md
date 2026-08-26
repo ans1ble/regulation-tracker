@@ -30,7 +30,7 @@ description: 追踪世界各国产品认证法规的最新动态（新规发布�
 
 **全球扫描执行**（广度优先，按「追踪范围」表逐市场批量扫）：
 
-1. 按「追踪范围」表**逐市场生成 query**：`{市场} {主要法规} 修订 2026`（覆盖全部 16 个市场，可拆 2-3 轮执行避免单次搜索过载）
+1. 按「追踪范围」表**逐市场生成 query**：`{市场} {主要法规} 修订 2026`（覆盖全部 16 个市场，可拆 2-3 轮执行避免单次搜索过载）；并同步检索主要电商平台政策变化：`{Amazon/Temu/SHEIN/Shopee} {市场} compliance/product requirement update`（见「电商平台合规要求」节）
 2. 单市场 ≥1 条候选即可纳入摘要；无更新的市场**如实标注"未发现更新"**
 3. 输出**全球动态摘要**（非深度影响分析）：按市场分组列出新规发布/生效倒计时/修订，每条带来源URL+日期，未核实的标 ⚠️
 4. 摘要生成后**仍走 🔴 CHECKPOINT 确认** → 使用者可从摘要圈定重点市场/产品，转入精准模式深挖
@@ -58,6 +58,54 @@ description: 追踪世界各国产品认证法规的最新动态（新规发布�
 | 🇹🇷 土耳其 | CE（AEEE 指令） | 土耳其商务部 |
 | 🇨🇱 智利 | SEC 电气认证（PE 1/40:2023） | SEC |
 | 🇳🇬 尼日利亚 | SONCAP（进口）、NCC（无线） | SON、NCC |
+
+## 📡 认证信息获取途径（官方渠道清单）
+
+> 搜索法规动态时，优先从下列**官方渠道**获取一手认证信息；官方 > 第三方认证机构/律所解读 > 行业媒体。所有 URL 为各监管机构官方域名（2026-08-26 整理；若失效按「市场不在追踪范围表」兜底流程重查）。
+
+| 市场 | 官方机构 / 查询入口 | URL |
+|------|---------------------|-----|
+| 🇨🇳 中国 | 市场监管总局 / 认监委公告 | samr.gov.cn · cnca.gov.cn |
+| 🇨🇳 中国 | CCC 证书查询 | cx.cnca.cn |
+| 🇨🇳 中国 | SRRC 型号核准（工信部） | miit.gov.cn |
+| 🇪🇺 欧盟 | EUR-Lex 法规原文库 | eur-lex.europa.eu |
+| 🇪🇺 欧盟 | Safety Gate 不安全产品预警 | ec.europa.eu/safety-gate |
+| 🇺🇸 美国 | FCC 设备授权 / FCC ID 查询 / KDB 知识库 | fcc.gov/oet/ea · fcc.gov/oet/ea/fccid · apps.fcc.gov/kdb |
+| 🇺🇸 美国 | CPSC 消费品安全委员会（含 CPC） | cpsc.gov |
+| 🇯🇵 日本 | METI 经济产业省 / MIC 总务省 / TELEC 认证机构 | meti.go.jp · soumu.go.jp · telec.or.jp |
+| 🇰🇷 韩国 | RRA 无线电研究院 / KC 认证查询 | rra.go.kr · cert.safetykorea.kr |
+| 🇦🇺 澳洲 | ACMA 通信媒体局 / 能效标识 | acma.gov.au · energyrating.gov.au |
+| 🇧🇷 巴西 | ANATEL 电信局 / INMETRO | gov.br/anatel · inmetro.gov.br |
+| 🇮🇳 印度 | BIS（CRS：Manakonline）/ TEC / WPC(Dot) | bis.gov.in · manakonline.in · tec.gov.in · dot.gov.in |
+| 🇷🇺 EAEU | 欧亚经济委员会技术法规 | eurasiancommission.org |
+| 🇻🇳🇮🇩🇹🇭 越南/印尼/泰 | 越南 MIC / 印尼 KOMDIGI / 泰国 NBTC | mic.gov.vn · komdigi.go.id · nbtc.go.th |
+| 🇲🇽 墨西哥 | 经济部 NOM 公告 / ANCE / NYCE | gob.mx/se · ance.org.mx · nyce.com.mx |
+| 🇸🇦 沙特 | SASO 标准 / SABER 平台 | saso.gov.sa · saber.sa |
+| 🇨🇦 加拿大 | ISED 创新科技部（设备清单 REL） | ised-isde.canada.ca |
+| 🇹🇷 土耳其 | 商务部 / 官方公报 | ticaret.gov.tr · resmigazete.gov.tr |
+| 🇨🇱 智利 | SEC 电气监察 / SUBTEL 电信部 | sec.cl · subtel.gob.cl |
+| 🇳🇬 尼日利亚 | SON 标准局 / NCC 通信委 | son.gov.ng · ncc.gov.ng |
+
+**二手权威渠道**（用于交叉验证，不能替代官方来源）：
+- 第三方检测认证机构法规速递：TÜV Rheinland / TÜV SÜD、SGS、UL Solutions、Intertek、Bureau Veritas 官网 Regulatory Updates
+- 律所产品合规 alert：Baker McKenzie、Jones Day、Chambers 等
+- 行业合规媒体：icertifi、Eleos Compliance、ACB International Approvals 等（仅引用时标注 ⚠️ 行业报道）
+
+## 🛒 电商平台合规要求（Amazon / Temu / SHEIN / Shopee）
+
+> 平台是法规落地的最后一道关卡：平台资质要求往往**早于或严于**当地法规，且 FCC 26-50 已将「平台 FCC ID 展示」写为法定义务。扫描时把平台政策变化与对应市场法规联动分析。
+
+| 平台 | 合规要求要点 | 卖家中心 / 官方入口 | 更新日期 |
+|------|--------------|---------------------|----------|
+| Amazon | 类目产品合规文件审核（CPC、FCC ID、能效标签、GPSR 欧代等），缺失即下架/禁售；受 FCC 26-50 平台 FCC ID 展示义务约束（Cat1 2027-03-01 起） | sellercentral.amazon.com ✅ | 2026-08-26 |
+| Temu | 产品资质上传+平台审核抽检（CCC/CE/CPC/RSL 等），资质过期管控；中国商家走拼多多跨境入口 | seller.temu.com ✅（海外商家）· seller.kuajingmaihuo.com ✅（中国商家） | 2026-08-26 |
+| SHEIN Marketplace | 分区域招商门户；商品需上传资质/检测报告，具体类目要求以卖家中心为准 ⚠️ 细节待核实 | seller-us.shein.com ✅ · seller-eu.shein.com ✅ · seller-me.shein.com ✅（中东） | 2026-08-26 |
+| Shopee | 各站点本地合规差异大（印尼 SDPPI/SNI、泰国 NBTC、越南 MIC CR 等）；卖家大学有站点合规指引 ⚠️ 细节待核实 | seller.shopee.com ✅ | 2026-08-26 |
+
+**平台 × 法规联动关注点**：
+1. **欧盟 GPSR/DSA**：平台对在售商品负欧代信息核验义务（意大利 GPSR 执行法令已强化在线平台义务，见知识库）→ 平台下架压力 = 合规倒逼信号
+2. **美国 FCC 26-50**：电商平台须在点售处展示有效准确 FCC ID（Cat1 2027-03-01 / Cat2 2027-06-01）→ 出口美国的无线产品提前自查证书状态
+3. **平台政策快于法规**：平台新增强制检测项（如 RSL 化学限值、包装标签）通常先于政府强制 → 每次扫描同步检索 `{平台} {市场} compliance policy update {年份}`
 
 ### 必查法规领域矩阵（覆盖度自检）
 
@@ -279,6 +327,7 @@ description: 追踪世界各国产品认证法规的最新动态（新规发布�
 ## 参考资源
 
 - 完整法规库: `memory/regulation-knowledge-base.md`
+- 认证信息渠道 + 平台合规快照: `memory/certification-sources-and-platforms.md`
 - 今日日记: `memory/work/daily/YYYY-MM-DD.md`
 - 知识库表头: 法规|市场|状态|生效日期|要求|来源|更新日期
 

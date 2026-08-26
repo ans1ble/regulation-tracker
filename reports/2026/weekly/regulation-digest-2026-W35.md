@@ -300,6 +300,36 @@
 
 ---
 
+## 🛒 电商平台合规动态（Amazon / Temu / SHEIN / Shopee）
+
+> 以下为各平台近期（2026 年 5–8 月，含 W35 窗口）面向卖家的合规要求/政策变化。平台政策非"法规"但直接影响在售产品合规路径，单独成节。来源含平台官方帮助中心与行业/媒体解读；行业来源标 ⚠️。
+
+### 【近期·持续】Amazon：FCC SDoC 严打 + 平台 FCC ID 展示联动
+- **变化**: 2026 年合规校验下沉到 listing 级（结构化字段：授权类型 / FCC ID / 四个 SDoC 美方联系字段），对历史老 listing 全目录抽查，响应窗口 14–30 天，逾期下架；与 INFORM Consumers Act（高销量卖家身份核验）共用准入闸口。
+- **配套**: Seller Central「FCC Radio Frequency Emission Compliance」合规属性为官方强制字段（射频设备必填）；GPSR 欧盟 Responsible Person 强制；CPSC 儿童产品 CPC 自 2026-07-08 起 eFiling（电子申报，边境 CBP 联动）。
+- **影响产品**: 含无线模块（BT/Wi-Fi/蜂窝）及无意辐射消费电子、儿童产品。
+- **来源**: https://sellercentral.amazon.com/help/hub/reference/external/4SMR4GXQ3PYD8BK ✅（官方 FCC 属性说明）；https://www.uscomplianceagent.com/post/amazon-fcc-sdoc-enforcement-2026 ⚠️（行业解读，2026-05-03）；https://www.irtslab.com/news/amazon-seller-compliance-2026-cpc-ce-fcc-and-rohs-documentation-requirements/ ⚠️（2026-08-20，CPC eFiling）；https://sellercentral.amazon.com/help/hub/reference/external/GWJNNZQD3Y4U3PAK ✅（官方 GPSR 提交指引）。
+
+### 【近期·持续】Temu：GPSR 欧盟责任代表 + CE/UKCA/RSL/EPR 全栈合规
+- **变化**: GPSR（EU 2023/988，2024-12-13 全面适用）下，卖家须指定 EU/UK 授权代表，标签与详情页展示制造商、授权代表、产品识别、警示信息；2024-08-15 起缺失 EU Rep 的产品批量下架，平台邮件核验代表协议真实性。CE/UKCA 产品须在产品本体（非仅包装）永久标注制造商信息。
+- **认证清单**: CE-RoHS（铅/镉/邻苯）、RSL（REACH Annex XVII：铅、镉、邻苯、SCCP 等）、EU/UK 授权代表、EPR（德国 LUCID/包装、WEEE、电池等）、美国 FCC、UL、加拿大 ISED、儿童产品 CPC。2026-05 起 Temu 卖家中心集成 Qima 检测/验厂/培训。
+- **影响产品**: 全类（电子、玩具、纺织、电池产品转全型号测试）。
+- **来源**: https://www.jjrlab.com/news/temu-eu-gpsr-compliance-eu-responsible-person.html ⚠️（EU Rep/标签要求）；https://www.inriver.com/resources/product-data-requirements-temu/ ⚠️（2026-04-01，合规字段/本体标注）；https://blog.m2ecloud.com/sell-on-temu-in-germany-a-full-seller-s-guide-from-m2e/ ⚠️（2026-05-20，德国 GPSR/LUCID/WEEE）；https://chainstoreage.com/shein-launches-compliance-training-sellers ⚠️（2026-06-11，Qima 集成）。
+
+### 【近期】SHEIN：卖家产品安全合规培训系列 + 强化治理
+- **发布**: 2026-06-10 宣布、首场 2026-05-29（儿童玩具产品安全），联合 Bureau Veritas / Intertek / SGS / TÜV SÜD；Seller Education Hub 提供数百门合规课程。
+- **治理升级**: 2026 年加大 AI 驱动监测与人工复核、资质前置筛查、周期性再认证；法国 DGCCRF 因订单确认/撤回权/环境信息违规于 2026-06 对运营 Shein 法国的两家公司处以 €22.5m 罚款（平台称"显失比例"并将申诉）。
+- **认证要求**: 自有 RSL、欧盟 RoHS、美国 FCC（高压电子产品加强核验测试报告/标签/证书）。
+- **来源**: https://www.sheingroup.com/newsroom/shein-expands-marketplace-seller-education-offering-with-product-safety-and-quality-compliance ✅（官方，2026-06-11）；https://www.just-style.com/news/shein-training-series-compliance/ ⚠️（2026-06-15，含 DGCCRF 罚款）；https://www.prnewswire.com/news-releases/shein-expands-marketplace-seller-education-offering-with-product-safety-and-quality-compliance-series-302796523.html ✅（2026-06-10）；https://www.influencers-time.com/shein-seller-compliance-standards-brands-must-meet-now/ ⚠️（2026-06-16，再认证机制）。
+
+### 【近期】Shopee：印尼 NIB 强制 + 菲律宾受管制商品资质
+- **印尼（Permendag 19/2026）**: 2026-06-08 生效，电商平台须拒绝无 NIB（商业识别号）的卖家入驻；存量卖家 18 个月、新卖家 6 个月宽限，逾期暂停交易；跨境卖家须提交合法化营业执照、产品标准合规证明、印尼语描述、发货国。影响 Shopee 印尼站。
+- **菲律宾（ITA）**: 《互联网交易法》2025-06-20 生效，Shopee PH 自 2025-04-29 起受管制类目强制上传类目许可与产品认证（PS/ICC/FDA 等）。
+- **W35 专项更新**: 本次检索未发现 2026-W35（08-24~08-26）窗口内 Shopee 全球专项合规政策新增；以上为近期持续执行项，如后续发布将补录。
+- **来源**: https://www.dfdl.com/insights/legal-and-tax-updates/indonesia-ecommerce-regulation-permendag-19-2026/ ⚠️（2026-07-10，Permendag 19/2026）；https://voffice.co.id/blog/en/nib-for-marketplace-guide/ ⚠️（2026-07-16，NIB 实操）；https://open.shopee.com/announcements/1128 ✅（官方，PH 强制认证 2025）；https://seller.shopee.ph/edu/article/24236 ✅（官方，PH 受管制商品资质）。
+
+---
+
 ## 📊 必查法规领域覆盖度自检（W35）
 
 | 市场 | 产品安全 | 无线/电信 | 电池 | 化学(RoHS·REACH·PFAS) | 能效 | AI/数字 |
@@ -364,7 +394,16 @@
 | 🇳🇬 尼日利亚 | 有更新（SONCAP NSW/NCC） | 2+ |
 | 🇻🇳🇮🇩🇹🇭 东南亚 | 有更新（VN 36/14、ID 6GHz、TH NBTC） | 3+ |
 
-> 16/16 市场完成扫描。所有条目带来源 URL 与日期；未核实数据已标 ⚠️ 待核实，未编造日期/限值。知识库（regulation-tracker/memory/）按任务要求本次未写入。
+### 电商平台检索记录
+
+| 平台 | 检索结果 | 来源数 |
+|------|----------|--------|
+| 🛒 Amazon | 有更新（FCC SDoC 严打/FCC 属性/CPC eFiling/GPSR） | 4+ |
+| 🛒 Temu | 有更新（GPSR EU Rep/CE·UKCA·RSL·EPR/Qima 集成） | 4+ |
+| 🛒 SHEIN | 有更新（卖家合规培训系列/DGCCRF 罚款/AI 监测） | 4+ |
+| 🛒 Shopee | 有更新（印尼 NIB 强制/菲律宾 ITA 资质；W35 内无专项新增） | 4+ |
+
+> 16/16 市场 + 4/4 电商平台完成扫描。所有条目带来源 URL 与日期；未核实数据已标 ⚠️ 待核实，未编造日期/限值。知识库（regulation-tracker/memory/）按任务要求本次未写入。
 
 ---
 
